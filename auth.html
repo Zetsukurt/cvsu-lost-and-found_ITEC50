@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CvSU Lost & Found</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+        <h1 class="text-2xl font-bold text-green-700 text-center mb-6">CvSU Lost & Found</h1>
+        
+        <div class="flex border-b mb-6">
+            <button type="button" id="loginTab" class="flex-1 py-2 font-bold border-b-2 border-green-600 text-green-700">Login</button>
+            <button type="button" id="signupTab" class="flex-1 py-2 font-bold text-gray-400 border-b-2 border-transparent">Sign Up</button>
+        </div>
+
+        <form id="authForm" class="space-y-4">
+            <div id="nameField" class="hidden">
+                <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                <input type="text" id="fullName" class="w-full border p-2 rounded mt-1">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Email Address</label>
+                <input type="email" id="email" required class="w-full border p-2 rounded mt-1" placeholder="student@cvsu.edu.ph">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="password" required class="w-full border p-2 rounded mt-1">
+            </div>
+
+            <button type="submit" id="authBtn" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700 transition">
+                Login
+            </button>
+        </form>
+        
+        <p id="message" class="mt-4 text-center text-sm text-red-500"></p>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
