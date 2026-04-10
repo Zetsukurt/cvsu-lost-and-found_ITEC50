@@ -85,17 +85,15 @@ function handleSearch() {
 
 // --- DATA FETCHING ---
 
-// 1. PUBLIC GALLERY (With Grace Period Logic)
+// 1. PUBLIC GALLERY (With 100-second testing Grace Period)
 async function fetchItems(categoryFilter = 'All', searchTerm = '') {
     currentCategory = categoryFilter;
     updateFilterButtonStyles(categoryFilter);
 
-    // Show items returned within the last 24 hours
-    const timeLimit = new Date(Date.now() - 10 * 1000).toISOString();
+    const timeLimit = new Date(Date.now() - 100 * 1000).toISOString();
 
     let query = _supabase.from('items')
         .select('*')
-        // Filter: Status is available OR status is returned AND returned recently
         .or(`status.eq.available,and(status.eq.returned,returned_at.gt.${timeLimit})`)
         .order('created_at', { ascending: false });
 
@@ -106,7 +104,7 @@ async function fetchItems(categoryFilter = 'All', searchTerm = '') {
     if (error) return console.error(error);
 
     if (data.length === 0) {
-        itemGallery.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500">No active or recently claimed items.</div>`;
+        itemGallery.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500">No active items.</div>`;
         return;
     }
 
@@ -125,7 +123,7 @@ async function fetchItems(categoryFilter = 'All', searchTerm = '') {
                     <h3 class="font-bold text-lg leading-tight truncate pr-2" title="${item.title}">${item.title}</h3>
                     <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold uppercase whitespace-nowrap">${item.category || 'Others'}</span>
                 </div>
-                <p class="text-xs font-semibold text-green-700 mb-2 italic">📍 ${item.location_found}</p>
+                <p class="text-xs font-semibold text-green-700 mb-2 italic">📍 Found: ${item.location_found}</p>
                 <p class="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">${item.description || 'No description provided.'}</p>
                 <div class="flex justify-between items-center mt-auto">
                     <span class="px-2 py-1 bg-green-100 text-green-800 text-[10px] font-bold rounded capitalize">${item.status}</span>
@@ -151,7 +149,7 @@ async function fetchMyReports(categoryFilter = 'All') {
     if (error) return console.error(error);
 
     if (data.length === 0) {
-        itemGallery.innerHTML = `<p class="col-span-full text-center py-20 text-gray-500">You haven't reported any items in this category.</p>`;
+        itemGallery.innerHTML = `<p class="col-span-full text-center py-20 text-gray-500">No reports found.</p>`;
         return;
     }
 
@@ -174,10 +172,21 @@ async function fetchMyReports(categoryFilter = 'All') {
                     item.claims.filter(c => c.status !== 'rejected').map(claim => `
                         <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
                             <p class="text-sm text-gray-700 mb-3 font-medium underline decoration-green-200 underline-offset-4 decoration-2">Proof: "${claim.proof_text}"</p>
+                            
                             ${item.status === 'available' && claim.status === 'pending' ? `
-                                <div class="flex gap-2">
-                                    <button onclick="resolveClaim('${claim.id}', '${item.id}', 'approved')" class="flex-1 py-1.5 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 transition shadow-sm">Approve</button>
-                                    <button onclick="resolveClaim('${claim.id}', '${item.id}', 'rejected')" class="flex-1 py-1.5 bg-red-500 text-white text-xs font-bold rounded hover:bg-red-600 transition shadow-sm">Reject</button>
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase">Select Drop-off Station:</label>
+                                    <select id="location_select_${claim.id}" class="w-full text-xs border border-gray-300 rounded p-1.5 outline-none bg-white">
+                                        <option value="DIT Guardhouse">DIT Guardhouse</option>
+                                        <option value="OSAS Office">OSAS Office</option>
+                                        <option value="Main Library Ground Floor">Main Library</option>
+                                        <option value="Gate 1 Guardhouse">Gate 1 Guardhouse</option>
+                                        <option value="Gym Entrance Office">Gym Entrance Office</option>
+                                    </select>
+                                    <div class="flex gap-2">
+                                        <button onclick="resolveClaim('${claim.id}', '${item.id}', 'approved')" class="flex-1 py-1.5 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 shadow-sm transition">Approve & Surrender</button>
+                                        <button onclick="resolveClaim('${claim.id}', '${item.id}', 'rejected')" class="flex-1 py-1.5 bg-red-500 text-white text-xs font-bold rounded hover:bg-red-600 shadow-sm transition">Reject</button>
+                                    </div>
                                 </div>
                             ` : `
                                 <div class="flex items-center gap-2">
@@ -200,14 +209,14 @@ async function fetchMyClaims() {
     
     const { data, error } = await _supabase
         .from('claims')
-        .select(`*, items (title, location_found, status)`)
+        .select(`*, items (title, location_found, status, pickup_location)`)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
     if (error) return console.error(error);
 
     if (data.length === 0) {
-        itemGallery.innerHTML = `<p class="col-span-full text-center py-20 text-gray-500">You haven't made any claims yet.</p>`;
+        itemGallery.innerHTML = `<p class="col-span-full text-center py-20 text-gray-500">No claims submitted.</p>`;
         return;
     }
 
@@ -221,14 +230,19 @@ async function fetchMyClaims() {
                     ${claim.status}
                 </span>
             </div>
-            <p class="text-xs text-gray-500 mb-3 italic">📍 Location: ${claim.items.location_found}</p>
-            <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Your Proof:</p>
-                <p class="text-sm text-gray-600">"${claim.proof_text}"</p>
+            <p class="text-xs text-gray-500 mb-3 italic">📍 Initially found at: ${claim.items.location_found}</p>
+            <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-3">
+                <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Your Proof Submitted:</p>
+                <p class="text-sm text-gray-600 italic">"${claim.proof_text}"</p>
             </div>
+            
             ${claim.status === 'approved' ? `
-                <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-xs text-green-800 font-bold animate-bounce">
-                    🎉 Claim accepted! Please coordinate with the finder.
+                <div class="p-3 bg-green-50 border border-green-200 rounded-lg shadow-inner">
+                    <p class="text-xs text-green-800 font-bold mb-1 uppercase tracking-tight">🎉 Ready for Pickup!</p>
+                    <p class="text-[11px] text-green-700 leading-tight">
+                        Please proceed to <span class="font-black underline">${claim.items.pickup_location}</span> to claim your item. 
+                        Don't forget to bring your Student ID!
+                    </p>
                 </div>` : ''}
         </div>
     `).join('');
@@ -236,25 +250,32 @@ async function fetchMyClaims() {
 
 // --- CLAIM RESOLUTION ---
 async function resolveClaim(claimId, itemId, decision) {
-    if (!confirm(`Are you sure you want to ${decision} this claim?`)) return;
+    let pickupPoint = null;
+
+    if (decision === 'approved') {
+        const selectElement = document.getElementById(`location_select_${claimId}`);
+        pickupPoint = selectElement.value;
+        if (!confirm(`Confirm approval? Ensure you have dropped off the item at ${pickupPoint}.`)) return;
+    } else {
+        if (!confirm("Reject this claim?")) return;
+    }
 
     try {
-        // Update claim status
         const { error: claimErr } = await _supabase.from('claims').update({ status: decision }).eq('id', claimId);
         if (claimErr) throw claimErr;
 
-        // If approved, update item status AND set the returned_at timestamp
         if (decision === 'approved') {
             const { error: itemErr } = await _supabase.from('items')
                 .update({ 
                     status: 'returned',
+                    pickup_location: pickupPoint,
                     returned_at: new Date().toISOString() 
                 })
                 .eq('id', itemId);
             if (itemErr) throw itemErr;
         }
 
-        alert(`Claim ${decision} successfully!`);
+        alert(`Claim ${decision}!`);
         fetchMyReports(currentCategory); 
     } catch (err) {
         alert("Action failed: " + err.message);
@@ -276,7 +297,7 @@ function closeClaimModal() {
 document.getElementById('confirmClaimBtn').addEventListener('click', async () => {
     const proof = document.getElementById('proofText').value;
     const { data: { user } } = await _supabase.auth.getUser();
-    if (!proof.trim()) return alert("Proof is required.");
+    if (!proof.trim()) return alert("Proof details are required.");
 
     const { error } = await _supabase.from('claims').insert([{
         item_id: selectedItemId,
@@ -286,7 +307,7 @@ document.getElementById('confirmClaimBtn').addEventListener('click', async () =>
     }]);
 
     if (error) return alert(error.message);
-    alert("Claim submitted!");
+    alert("Claim submitted successfully!");
     closeClaimModal();
     fetchItems(currentCategory, currentSearch);
 });
@@ -296,7 +317,7 @@ reportForm.addEventListener('submit', async (e) => {
     const { data: { user } } = await _supabase.auth.getUser();
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = true;
-    submitBtn.innerText = "Processing...";
+    submitBtn.innerText = "Reporting...";
 
     const file = document.getElementById('itemImage').files[0];
     let imageUrl = null;

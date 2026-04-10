@@ -1,39 +1,39 @@
-The Lost & Found MVP Checklist
-1. User Authentication (The "Who")
-Sign Up/Login: Using Supabase Auth (Email/Password).
+. User Authentication (The "Who") — [DONE ✅]
+Sign Up/Login: Secure auth via Supabase.
 
-Session Management: The app should "remember" who is logged in so their name appears in the navbar.
+Dynamic Navbar: Greets the user and provides a Logout function that clears the session.
 
-Secure Reporting: Only logged-in students can report an item.
+Gatekeeping: Automatic redirect to auth.html if no session is detected.
 
 2. Item Reporting (The "What") — [DONE ✅]
+Categorization: Added a dropdown for Electronics, Documents, Personal Items, Clothing, and Others.
 
+Media Handling: Images are successfully hashed and uploaded to Supabase Storage with public URL generation.
 
-Data Entry: Title, description, and location (no category yet)
+Traceability: Every item is now linked to a finder_id, creating a permanent record of who surrendered the item.
 
-Image Hosting: Files successfully uploading to Supabase Storage.
+3. Public Gallery & Discovery (The "Where") — [DONE ✅]
+Search Engine: Implemented real-time ilike searching for titles and descriptions.
 
-Database Record: Rows successfully appearing in the items table.
+Smart Filtering: Category buttons that work across all views (Gallery and Management).
 
-3. Public Gallery (The "Where") — [DONE ✅]
+The "Grace Period": Claimed items stay visible with a pulse badge for a set time (e.g., 24 hours) before auto-hiding to show the community the portal is working.
 
-Display: A clean grid showing recent finds.
+4. Claiming Mechanism (The "How") — [DONE ✅]
+Modal Submission: A clean pop-up for owners to submit "Proof of Ownership."
 
-Status Indicators: Visual tags showing if an item is "Available" or "Returned."
+Relational Database Entry: Claims are automatically linked to both the item_id and the user_id.
 
-4. Claiming Mechanism (The "How")
-This is the "interaction" part of the app.
+Status Tracking: Claims start as pending, awaiting the finder's review.
 
-"That's Mine" Button: Each item card needs a button.
+5. Status Management & Security (The "Resolution") — [DONE ✅]
+Finder's Dashboard: A private "My Found Items" tab that filters claims so finders only see requests for items they found.
 
-Proof Submission: A small text area where the owner describes a secret detail (e.g., "There’s a scratched sticker on the back").
+Hardened RLS: SQL policies that prevent unauthorized users from seeing proofs or approving their own claims.
 
-Database Entry: This sends a row to your claims table.
+Drop-off Protocol: A mandatory selection of a CvSU Pickup Station (OSAS, DIT, Library) before a claim can be approved.
 
-5. Status Management (The "Resolution")
-The loop needs to close so the item disappears from "Available."
+6. Notifications & Claimant View (The "Feedback") — [DONE ✅]
+Claimant Dashboard: A dedicated "My Claims" tab where owners can track their items.
 
-Finder's Dashboard: A private page where the finder can see who claimed their item.
-
-Approve/Reject: The finder clicks "Approve," which updates the items status to 'returned'.
-
+Instructional Messaging: Approved items automatically show a success message with the specific pickup location and a reminder to bring a Student ID.
