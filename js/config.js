@@ -1,5 +1,5 @@
 // --- CONFIGURATION TOGGLE ---
-const IS_PRODUCTION = true; // Set to true when pushing to GitHub/Vercel
+const IS_PRODUCTION = false; // Set to true when pushing to GitHub/Vercel
 
 const LOCAL_CONFIG = {
     URL: "http://127.0.0.1:54321",
