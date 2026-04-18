@@ -9,15 +9,30 @@ const userStatusDiv = document.getElementById('userStatus');
 let currentCategory = 'All';
 let currentSearch = '';
 let currentView = 'gallery'; 
+let isAdmin = false; // Track admin status globally
 
 // --- AUTH LOGIC ---
 async function checkUser() {
     const { data: { user } } = await _supabase.auth.getUser();
     if (user) {
+        // Fetch profile to check for Admin role
+        const { data: profile } = await _supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        isAdmin = profile?.role === 'admin';
+
         userStatusDiv.innerHTML = `
-            <span>Logged in as: ${user.user_metadata.full_name || user.email}</span>
-            <button onclick="handleLogout()" class="ml-2 underline text-xs">Logout</button>
+            <span>Logged in as: <strong>${user.user_metadata.full_name || user.email}</strong> ${isAdmin ? '<span class="ml-1 text-[10px] bg-red-600 text-white px-2 py-0.5 rounded-full shadow-sm">ADMIN</span>' : ''}</span>
+            <button onclick="handleLogout()" class="ml-2 underline text-xs text-gray-400 hover:text-red-500 transition-colors">Logout</button>
         `;
+
+        // Reveal the Admin button if they have the role
+        const adminBtn = document.getElementById('viewAdminBtn');
+        if (isAdmin && adminBtn) adminBtn.classList.remove('hidden');
+
         return user;
     } else {
         window.location.href = 'auth.html';
@@ -36,6 +51,8 @@ function handleCategoryClick(category) {
         fetchItems(category, currentSearch);
     } else if (currentView === 'myReports') {
         fetchMyReports(category);
+    } else if (currentView === 'admin') {
+        fetchAdminReports(category);
     }
 }
 
@@ -46,9 +63,10 @@ function toggleView(view) {
     const galleryBtn = document.getElementById('viewGalleryBtn');
     const reportsBtn = document.getElementById('viewMyReportsBtn');
     const claimsBtn = document.getElementById('viewMyClaimsBtn'); 
+    const adminBtn = document.getElementById('viewAdminBtn'); 
     const searchContainer = document.querySelector('#searchInput').parentElement.parentElement;
 
-    [galleryBtn, reportsBtn, claimsBtn].forEach(btn => {
+    [galleryBtn, reportsBtn, claimsBtn, adminBtn].forEach(btn => {
         if (btn) btn.className = "pb-2 border-b-2 border-transparent text-gray-400 hover:text-green-600 font-bold transition-all whitespace-nowrap";
     });
 
@@ -64,6 +82,10 @@ function toggleView(view) {
         claimsBtn.className = "pb-2 border-b-2 border-green-600 text-green-700 font-bold transition-all whitespace-nowrap";
         searchContainer.classList.add('hidden');
         fetchMyClaims();
+    } else if (view === 'admin') {
+        adminBtn.className = "pb-2 border-b-2 border-red-600 text-red-700 font-bold transition-all whitespace-nowrap";
+        searchContainer.classList.add('hidden');
+        fetchAdminReports('All');
     }
 }
 
@@ -85,7 +107,7 @@ function handleSearch() {
 
 // --- DATA FETCHING ---
 
-// 1. PUBLIC GALLERY (With 100-second testing Grace Period)
+// 1. PUBLIC GALLERY
 async function fetchItems(categoryFilter = 'All', searchTerm = '') {
     currentCategory = categoryFilter;
     updateFilterButtonStyles(categoryFilter);
@@ -153,7 +175,37 @@ async function fetchMyReports(categoryFilter = 'All') {
         return;
     }
 
+    itemGallery.innerHTML = data.map(item => renderManagementCard(item)).join('');
+}
+
+// 3. ADMIN OVERSIGHT (View everything)
+async function fetchAdminReports(categoryFilter = 'All') {
+    currentCategory = categoryFilter;
+    updateFilterButtonStyles(categoryFilter);
+    
+    // Admins see EVERYTHING
+    let query = _supabase.from('items').select(`*, claims (*), profiles:finder_id(full_name)`);
+    if (categoryFilter !== 'All') query = query.eq('category', categoryFilter);
+
+    const { data, error } = await query.order('created_at', { ascending: false });
+    if (error) return console.error(error);
+
     itemGallery.innerHTML = data.map(item => `
+        <div class="relative">
+            <button onclick="adminDeleteItem('${item.id}')" class="absolute -top-2 -right-2 bg-red-600 text-white p-1.5 rounded-full shadow-lg z-10 hover:bg-red-700 transition-colors" title="Admin Delete">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <p class="text-[9px] font-black text-red-600 uppercase mb-1">Found by: ${item.profiles?.full_name || 'System'}</p>
+            ${renderManagementCard(item)}
+        </div>
+    `).join('');
+}
+
+// Helper to render the management card (shared by Finder and Admin)
+function renderManagementCard(item) {
+    return `
         <div class="bg-white rounded-xl shadow-md p-4 border border-gray-200 flex flex-col ${item.status === 'returned' ? 'opacity-75 grayscale-[0.3]' : ''}">
             <div class="flex justify-between mb-4">
                 <div>
@@ -164,7 +216,6 @@ async function fetchMyReports(categoryFilter = 'All') {
                     ${item.status}
                 </span>
             </div>
-
             <div class="space-y-3">
                 <h4 class="text-[10px] font-bold uppercase text-gray-400 border-b border-gray-100 pb-1">Claims received</h4>
                 ${item.claims.filter(c => c.status !== 'rejected').length === 0 ? 
@@ -172,7 +223,6 @@ async function fetchMyReports(categoryFilter = 'All') {
                     item.claims.filter(c => c.status !== 'rejected').map(claim => `
                         <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
                             <p class="text-sm text-gray-700 mb-3 font-medium underline decoration-green-200 underline-offset-4 decoration-2">Proof: "${claim.proof_text}"</p>
-                            
                             ${item.status === 'available' && claim.status === 'pending' ? `
                                 <div class="space-y-2">
                                     <label class="text-[10px] font-bold text-gray-400 uppercase">Select Drop-off Station:</label>
@@ -180,11 +230,9 @@ async function fetchMyReports(categoryFilter = 'All') {
                                         <option value="DIT Guardhouse">DIT Guardhouse</option>
                                         <option value="OSAS Office">OSAS Office</option>
                                         <option value="Main Library Ground Floor">Main Library</option>
-                                        <option value="Gate 1 Guardhouse">Gate 1 Guardhouse</option>
-                                        <option value="Gym Entrance Office">Gym Entrance Office</option>
                                     </select>
                                     <div class="flex gap-2">
-                                        <button onclick="resolveClaim('${claim.id}', '${item.id}', 'approved')" class="flex-1 py-1.5 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 shadow-sm transition">Approve & Surrender</button>
+                                        <button onclick="resolveClaim('${claim.id}', '${item.id}', 'approved')" class="flex-1 py-1.5 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 shadow-sm transition">Approve</button>
                                         <button onclick="resolveClaim('${claim.id}', '${item.id}', 'rejected')" class="flex-1 py-1.5 bg-red-500 text-white text-xs font-bold rounded hover:bg-red-600 shadow-sm transition">Reject</button>
                                     </div>
                                 </div>
@@ -199,10 +247,10 @@ async function fetchMyReports(categoryFilter = 'All') {
                 }
             </div>
         </div>
-    `).join('');
+    `;
 }
 
-// 3. CLAIMS DASHBOARD (For Claimants)
+// 4. CLAIMS DASHBOARD
 async function fetchMyClaims() {
     updateFilterButtonStyles('All');
     const { data: { user } } = await _supabase.auth.getUser();
@@ -235,17 +283,24 @@ async function fetchMyClaims() {
                 <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Your Proof Submitted:</p>
                 <p class="text-sm text-gray-600 italic">"${claim.proof_text}"</p>
             </div>
-            
             ${claim.status === 'approved' ? `
                 <div class="p-3 bg-green-50 border border-green-200 rounded-lg shadow-inner">
                     <p class="text-xs text-green-800 font-bold mb-1 uppercase tracking-tight">🎉 Ready for Pickup!</p>
-                    <p class="text-[11px] text-green-700 leading-tight">
-                        Please proceed to <span class="font-black underline">${claim.items.pickup_location}</span> to claim your item. 
-                        Don't forget to bring your Student ID!
-                    </p>
+                    <p class="text-[11px] text-green-700 leading-tight">Proceed to <span class="font-black underline">${claim.items.pickup_location}</span> with your ID.</p>
                 </div>` : ''}
         </div>
     `).join('');
+}
+
+// --- ADMIN ACTIONS ---
+async function adminDeleteItem(itemId) {
+    if (!confirm("ADMIN ACTION: Permanently delete this report and all associated claims?")) return;
+    
+    const { error } = await _supabase.from('items').delete().eq('id', itemId);
+    if (error) return alert("Delete failed: " + error.message);
+    
+    alert("Item removed from database.");
+    fetchAdminReports(currentCategory);
 }
 
 // --- CLAIM RESOLUTION ---
@@ -255,7 +310,7 @@ async function resolveClaim(claimId, itemId, decision) {
     if (decision === 'approved') {
         const selectElement = document.getElementById(`location_select_${claimId}`);
         pickupPoint = selectElement.value;
-        if (!confirm(`Confirm approval? Ensure you have dropped off the item at ${pickupPoint}.`)) return;
+        if (!confirm(`Confirm approval? Ensure item is at ${pickupPoint}.`)) return;
     } else {
         if (!confirm("Reject this claim?")) return;
     }
@@ -276,7 +331,7 @@ async function resolveClaim(claimId, itemId, decision) {
         }
 
         alert(`Claim ${decision}!`);
-        fetchMyReports(currentCategory); 
+        currentView === 'admin' ? fetchAdminReports(currentCategory) : fetchMyReports(currentCategory); 
     } catch (err) {
         alert("Action failed: " + err.message);
     }

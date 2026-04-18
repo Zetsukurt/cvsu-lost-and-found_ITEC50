@@ -1,0 +1,1 @@
+const supabaseClient = supabase.createClient(SUB_URL, ANON_KEY);

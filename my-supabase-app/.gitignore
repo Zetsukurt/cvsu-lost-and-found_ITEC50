@@ -1,0 +1,12 @@
+# Supabase local data (Don't upload the actual DB contents!)
+supabase/.temp/
+supabase/.branches/
+supabase/.storage/
+
+# Environment/Secret files
+.env
+js/config.js
+
+# OS specific files
+.DS_Store
+Thumbs.db

@@ -18,7 +18,7 @@
 
     <main class="container mx-auto mt-8 p-4 grid grid-cols-1 md:grid-cols-3 gap-8">
         
-        <section class="bg-white p-6 rounded-xl shadow-md h-fit border-t-4 border-green-600">
+        <aside class="bg-white p-6 rounded-xl shadow-md h-fit border-t-4 border-green-600">
             <h2 class="text-lg font-bold mb-4 text-green-800">Report a Found Item</h2>
             <form id="reportForm" class="space-y-4">
                 <input type="text" id="title" placeholder="Item Name (e.g., Green Wallet)" required 
@@ -52,7 +52,7 @@
                     Submit Report
                 </button>
             </form>
-        </section>
+        </aside>
 
         <section class="md:col-span-2">
             <h2 class="text-lg font-bold mb-4 text-gray-700">Dashboard</h2>
@@ -70,6 +70,11 @@
                     class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-green-600 font-bold transition-all whitespace-nowrap">
                     My Claims
                 </button>
+                
+                <button id="viewAdminBtn" onclick="toggleView('admin')" 
+                    class="hidden pb-2 border-b-2 border-transparent text-gray-400 hover:text-red-600 font-bold transition-all whitespace-nowrap uppercase tracking-tighter">
+                    🛡️ Admin Console
+                </button>
             </div>   
 
             <div class="mb-4">
@@ -81,7 +86,7 @@
                         placeholder="Search for items (e.g. 'iPhone', 'ID', 'Blue folder')..." 
                         class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 outline-none shadow-sm transition">
                 </div>
-            </div>    
+            </div>     
 
             <div id="filterBar" class="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                 <button onclick="handleCategoryClick('All')" class="filter-btn whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium shadow-sm transition-all border border-gray-300 bg-white text-gray-600 hover:bg-green-50 hover:text-green-700">All</button>

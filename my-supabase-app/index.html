@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Supabase App</title>
+</head>
+<body>
+    <h1>Supabase Data:</h1>
+    
+    <div style="background: #f4f4f4; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h3>Add New Profile</h3>
+        <input type="text" id="new-username" placeholder="Username" style="display: block; margin-bottom: 10px;">
+        <input type="text" id="new-bio" placeholder="Bio" style="display: block; margin-bottom: 10px;">
+        <button onclick="addProfile()">Save to Database</button>
+    </div>
+
+    <div id="user-display">Loading...</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

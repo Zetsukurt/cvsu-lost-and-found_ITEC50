@@ -1,2 +1,5 @@
 #API Keys
 js/config.js
+
+my-supabase-app/supabase/.temp/
+my-supabase-app/supabase/.branches/
