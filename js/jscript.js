@@ -15,6 +15,7 @@ let isAdmin = false; // Track admin status globally
 async function checkUser() {
     const { data: { user } } = await _supabase.auth.getUser();
     if (user) {
+        
         // Fetch profile to check for Admin role
         const { data: profile } = await _supabase
             .from('profiles')
@@ -66,25 +67,33 @@ function toggleView(view) {
     const adminBtn = document.getElementById('viewAdminBtn'); 
     const searchContainer = document.querySelector('#searchInput').parentElement.parentElement;
 
+    // 1. Reset all buttons to "inactive" state without touching the 'hidden' class
     [galleryBtn, reportsBtn, claimsBtn, adminBtn].forEach(btn => {
-        if (btn) btn.className = "pb-2 border-b-2 border-transparent text-gray-400 hover:text-green-600 font-bold transition-all whitespace-nowrap";
+        if (btn) {
+            btn.classList.remove('border-green-600', 'text-green-700', 'border-red-600', 'text-red-700');
+            btn.classList.add('border-transparent', 'text-gray-400');
+        }
     });
 
+    // 2. Hide search if not in gallery
+    view === 'gallery' ? searchContainer.classList.remove('hidden') : searchContainer.classList.add('hidden');
+
+    // 3. Apply active styles based on the view
     if (view === 'gallery') {
-        galleryBtn.className = "pb-2 border-b-2 border-green-600 text-green-700 font-bold transition-all whitespace-nowrap";
-        searchContainer.classList.remove('hidden');
+        galleryBtn.classList.replace('text-gray-400', 'text-green-700');
+        galleryBtn.classList.replace('border-transparent', 'border-green-600');
         fetchItems('All');
     } else if (view === 'myReports') {
-        reportsBtn.className = "pb-2 border-b-2 border-green-600 text-green-700 font-bold transition-all whitespace-nowrap";
-        searchContainer.classList.add('hidden');
+        reportsBtn.classList.replace('text-gray-400', 'text-green-700');
+        reportsBtn.classList.replace('border-transparent', 'border-green-600');
         fetchMyReports('All');
     } else if (view === 'myClaims') {
-        claimsBtn.className = "pb-2 border-b-2 border-green-600 text-green-700 font-bold transition-all whitespace-nowrap";
-        searchContainer.classList.add('hidden');
+        claimsBtn.classList.replace('text-gray-400', 'text-green-700');
+        claimsBtn.classList.replace('border-transparent', 'border-green-600');
         fetchMyClaims();
-    } else if (view === 'admin') {
-        adminBtn.className = "pb-2 border-b-2 border-red-600 text-red-700 font-bold transition-all whitespace-nowrap";
-        searchContainer.classList.add('hidden');
+    } else if (view === 'admin' && isAdmin) { // STRICT CHECK
+        adminBtn.classList.replace('text-gray-400', 'text-red-700');
+        adminBtn.classList.replace('border-transparent', 'border-red-600');
         fetchAdminReports('All');
     }
 }

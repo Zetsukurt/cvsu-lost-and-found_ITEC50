@@ -40,12 +40,25 @@ authForm.onsubmit = async (e) => {
         window.location.href = 'index.html';
     } else {
         // SIGN UP
-        const { error } = await _supabase.auth.signUp({
+        const { data, error } = await _supabase.auth.signUp({
             email,
             password,
-            options: { data: { full_name: fullName } } // This sends the name to our Trigger!
+            options: { data: { full_name: fullName } }
         });
+
         if (error) return message.innerText = error.message;
-        alert("Check your email for the confirmation link!");
+
+        // 1. Sign them out immediately so the session is cleared
+        await _supabase.auth.signOut();
+
+        // 2. Clear the fields and alert the user
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('fullName').value = '';
+        
+        alert("Account created successfully! Please log in with your new credentials.");
+
+        // 3. Manually trigger the login tab click to switch the UI
+        loginTab.click(); 
     }
 };
