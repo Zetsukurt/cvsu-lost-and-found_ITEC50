@@ -110,7 +110,6 @@ async function fetchRecentItems() {
                 
                 <div class="card-footer">
                     <span class="status-tag">${item.status === 'found' ? 'Available' : item.status}</span>
-                    <button class="mine-btn">That's Mine!</button>
                 </div>
             </div>
         </div>
