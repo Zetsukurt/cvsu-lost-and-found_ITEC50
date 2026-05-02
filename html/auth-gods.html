@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CvSU Lost & Found</title>
+    <link rel="stylesheet" href="../css-gods/style-auth.css">
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="auth-page-wrapper">
+    <main class="split-layout">
+        <!-- Left Side: Branding -->
+        <section class="branding-side">
+            <div class="branding-content">
+                <div class="logo-box">
+                    <span class="logo-icon">
+                        <img src="../images/logo.png" alt ="Lost & Found Logo" class="logo-image">
+                    </span>
+                    <span class="logo-text">Lost & Found Web</span>
+                </div>
+                <h1 class="hero-text">EVERY LOST ITEM HAS A STORY. LET'S HELP IT FIND ITS WAY BACK</h1>
+                <p class="hero-subtext">A secure portal for reporting found items and reclaiming belongings within the CvSU community.</p>
+                <div class="carousel-visual">
+                    <div class="visual-item keys"></div>
+                    <div class="visual-item wallet"></div>
+                    <div class="visual-item watch"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Side: Auth Form -->
+        <section class="form-side">
+            <div class="auth-card">
+                <h2 id="formTitle" class="card-header">Create an Account</h2>
+                <p id="formSubtitle" class="card-subheader">Sign up to start your journey</p>
+
+                <div class="tab-container">
+                    <button type="button" id="loginTab" class="tab-link">Login</button>
+                    <button type="button" id="signupTab" class="tab-link active">Sign Up</button>
+                </div>
+
+                <form id="authForm" class="form-layout">
+                    <!-- Signup Only: Full Name -->
+                    <div id="nameField" class="input-group">
+                        <label class="label-text">Full Name</label>
+                        <input type="text" id="fullName" placeholder="Juan Dela Cruz" class="field-input">
+                    </div>
+
+                    <!-- Shared: Student ID (Acts as username/email) -->
+                    <div class="input-group">
+                        <label class="label-text">Student ID</label>
+                        <input type="text" id="studentId" required placeholder="e.g. 202610123" class="field-input">
+                    </div>
+
+                    <!-- Shared: Password -->
+                    <div class="input-group">
+                        <label class="label-text">Password</label>
+                        <input type="password" id="password" required placeholder="Enter your password" class="field-input">
+                    </div>
+
+                    <!-- Signup Only: Security Questions -->
+                    <div id="recoveryFields" class="input-group">
+                        <label class="label-text">Security Question (Recovery)</label>
+                        <select id="securityQuestion" class="field-input">
+                            <option value="" disabled selected>Select a question</option>
+                            <option value="pet">What was the name of your first pet?</option>
+                            <option value="highschool">What was the name of your high school?</option>
+                            <option value="city">In what city were you born?</option>
+                        </select>
+                        <input type="text" id="securityAnswer" placeholder="Your answer" class="field-input" style="margin-top: 10px;">
+                    </div>
+
+                    <!-- Signup Only: Privacy Checkbox -->
+                    <div id="privacyGroup" class="checkbox-container">
+                        <input type="checkbox" id="privacyPolicy">
+                        <label for="privacyPolicy" class="checkbox-label">
+                            I agree that my information will be processed in accordance with the <strong>Data Privacy Act 2012</strong>.
+                        </label>
+                    </div>
+
+                    <button type="submit" id="authBtn" class="action-btn">Sign Up</button>
+                </form>
+                
+                <p id="message" class="error-message"></p>
+                <div class="divider"><span>OR</span></div>
+                <p class="toggle-hint">Already have an account? <span id="toggleLink" class="link-text" style="cursor:pointer; color:var(--cvsu-green); font-weight:bold;">Login</span></p>
+            </div>
+        </section>
+    </main>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+</body>
+</html>

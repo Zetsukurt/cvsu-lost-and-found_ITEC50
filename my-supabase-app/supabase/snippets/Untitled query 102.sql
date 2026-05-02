@@ -1,2 +1,0 @@
-ALTER TABLE public.items ADD COLUMN IF NOT EXISTS pickup_location TEXT;
-ALTER TABLE public.items ADD COLUMN IF NOT EXISTS returned_at TIMESTAMP WITH TIME ZONE;

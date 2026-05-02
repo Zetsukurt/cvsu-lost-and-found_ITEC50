@@ -1,64 +1,106 @@
+// Initialize Supabase (Ensure these are in your config.js)
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const authForm = document.getElementById('authForm');
 const loginTab = document.getElementById('loginTab');
 const signupTab = document.getElementById('signupTab');
 const nameField = document.getElementById('nameField');
+const recoveryFields = document.getElementById('recoveryFields');
+const privacyGroup = document.getElementById('privacyGroup');
 const authBtn = document.getElementById('authBtn');
 const message = document.getElementById('message');
+const formTitle = document.getElementById('formTitle');
+const formSubtitle = document.getElementById('formSubtitle');
+const toggleLink = document.getElementById('toggleLink');
 
-let isLogin = true;
+let isLogin = false; // Initial view is Sign Up
 
-// Tab Switching Logic
-loginTab.onclick = () => {
+// --- UI TOGGLE LOGIC ---
+const showLogin = () => {
     isLogin = true;
-    nameField.classList.add('hidden');
-    loginTab.classList.add('border-green-600', 'text-green-700');
-    signupTab.classList.remove('border-green-600', 'text-green-700');
+    nameField.style.display = 'none';
+    recoveryFields.style.display = 'none';
+    privacyGroup.style.display = 'none';
+    loginTab.classList.add('active');
+    signupTab.classList.remove('active');
+    formTitle.innerText = "Welcome Back";
+    formSubtitle.innerText = "Login with your Student ID";
     authBtn.innerText = "Login";
+    message.innerText = "";
 };
 
-signupTab.onclick = () => {
+const showSignup = () => {
     isLogin = false;
-    nameField.classList.remove('hidden');
-    signupTab.classList.add('border-green-600', 'text-green-700');
-    loginTab.classList.remove('border-green-600', 'text-green-700');
+    nameField.style.display = 'flex';
+    recoveryFields.style.display = 'flex';
+    privacyGroup.style.display = 'flex';
+    signupTab.classList.add('active');
+    loginTab.classList.remove('active');
+    formTitle.innerText = "Create an Account";
+    formSubtitle.innerText = "Sign up to start your journey";
     authBtn.innerText = "Create Account";
+    message.innerText = "";
 };
 
-// Form Submission
+loginTab.onclick = showLogin;
+signupTab.onclick = showSignup;
+toggleLink.onclick = () => isLogin ? showSignup() : showLogin();
+
+// --- AUTHENTICATION LOGIC ---
 authForm.onsubmit = async (e) => {
     e.preventDefault();
-    const email = document.getElementById('email').value;
+    message.innerText = "Processing...";
+    
+    const studentId = document.getElementById('studentId').value.trim();
     const password = document.getElementById('password').value;
-    const fullName = document.getElementById('fullName').value;
+    const maskedEmail = `${studentId}@cvsu.edu.ph`; // Background utility
 
     if (isLogin) {
-        // LOGIN
-        const { error } = await _supabase.auth.signInWithPassword({ email, password });
-        if (error) return message.innerText = error.message;
-        window.location.href = 'index.html';
-    } else {
-        // SIGN UP
-        const { data, error } = await _supabase.auth.signUp({
-            email,
-            password,
-            options: { data: { full_name: fullName } }
+        // Handle Login
+        const { error } = await _supabase.auth.signInWithPassword({
+            email: maskedEmail,
+            password: password
         });
 
-        if (error) return message.innerText = error.message;
+        if (error) {
+            message.innerText = "Invalid Student ID or Password.";
+        } else {
+            window.location.href = 'index.html';
+        }
 
-        // 1. Sign them out immediately so the session is cleared
-        await _supabase.auth.signOut();
+    } else {
+        // Handle Sign Up
+        const fullName = document.getElementById('fullName').value.trim();
+        const question = document.getElementById('securityQuestion').value;
+        const answer = document.getElementById('securityAnswer').value.trim().toLowerCase();
+        const privacyChecked = document.getElementById('privacyPolicy').checked;
 
-        // 2. Clear the fields and alert the user
-        document.getElementById('email').value = '';
-        document.getElementById('password').value = '';
-        document.getElementById('fullName').value = '';
-        
-        alert("Account created successfully! Please log in with your new credentials.");
+        // Validations
+        if (!fullName || !question || !answer) {
+            return message.innerText = "Please fill in all fields.";
+        }
+        if (!privacyChecked) {
+            return message.innerText = "You must agree to the Data Privacy Act.";
+        }
 
-        // 3. Manually trigger the login tab click to switch the UI
-        loginTab.click(); 
+        const { error } = await _supabase.auth.signUp({
+            email: maskedEmail,
+            password: password,
+            options: {
+                data: {
+                    full_name: fullName,
+                    student_id: studentId,
+                    security_question: question,
+                    security_answer: answer
+                }
+            }
+        });
+
+        if (error) {
+            message.innerText = error.message;
+        } else {
+            alert("Registration successful! You can now log in.");
+            showLogin();
+        }
     }
 };

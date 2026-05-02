@@ -1,0 +1,203 @@
+:root {
+    --cvsu-green: #3d5a3d;
+    --bg-beige: #e5e0d4;
+    --card-bg: #d9d6cc;
+    --white: #ffffff;
+    --input-bg: #ede8de;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+/* Fixed: No scrolling */
+body.upload-wrapper {
+    background: linear-gradient(to bottom, var(--cvsu-green) 50%, var(--bg-beige) 50%);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navbar Fixes */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 60px;
+    color: var(--white);
+}
+
+.nav-logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.4rem; }
+.nav-links { display: flex; list-style: none; gap: 30px; }
+.nav-links a { color: var(--white); text-decoration: none; font-size: 0.85rem; font-weight: 600; opacity: 0.8; }
+.nav-links a.active { opacity: 1; border-bottom: 2px solid var(--white); }
+.nav-user { display: flex; align-items: center; gap: 15px; }
+.user-avatar { width: 35px; height: 35px; background: #fff; border-radius: 50%; }
+
+.upload-container { 
+    display: flex; 
+    padding: 20px 60px; 
+    gap: 50px; 
+    flex: 1; 
+    align-items: flex-start;
+}
+
+/* --- Form Panel --- */
+.form-panel {
+    flex: 0.5;
+    background: var(--card-bg);
+    border-radius: 40px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    max-height: 90%; /* Keep it within view */
+}
+
+.form-panel h2 { font-family: 'Georgia', serif; font-style: italic; color: var(--cvsu-green); margin-bottom: 20px; font-size: 1.4rem; }
+
+.input-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
+.input-group label { font-size: 0.85rem; font-weight: 600; color: var(--cvsu-green); }
+
+input[type="text"], .custom-select, textarea {
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: none;
+    background: var(--input-bg);
+    outline: none;
+    font-size: 0.9rem;
+}
+
+/* Fixed: Dropdown hover/focus */
+.custom-select { cursor: pointer; appearance: auto; }
+.custom-select:focus { background: #d1cdc1; }
+
+textarea { height: 100px; resize: none; }
+
+/* Custom File Upload Styling */
+.custom-file-upload { display: flex; align-items: center; gap: 10px; }
+.custom-file-upload input[type="file"] { display: none; }
+
+.file-btn {
+    background: #f0f0f0;
+    border: 1px solid #aaa;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #333;
+}
+
+#fileNameDisplay { font-size: 0.8rem; color: #555; }
+
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--cvsu-green);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* Card Container Adjustments */
+.recent-grid {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+.item-card {
+    background: var(--card-bg);
+    width: 280px;
+    border-radius: 20px;
+    padding: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+.card-img {
+    width: 100%;
+    height: 150px;
+    border-radius: 15px;
+    object-fit: cover;
+    margin-bottom: 12px;
+}
+
+/* Info Layout */
+.card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title-row h4 {
+    font-size: 1.1rem;
+    color: var(--text-dark);
+}
+
+/* Category & Status Tags */
+.cat-tag {
+    background: #5a6b5a;
+    color: white;
+    font-size: 0.6rem;
+    padding: 3px 10px;
+    border-radius: 10px;
+    text-transform: capitalize;
+}
+
+.loc-text {
+    font-size: 0.7rem;
+    color: #444;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.reporter-name {
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+/* Footer alignment */
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.status-tag {
+    background: #c2ccb1;
+    color: #3d5a3d;
+    font-size: 0.65rem;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 12px;
+}
+
+.mine-btn {
+    background: var(--cvsu-green);
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* --- Info Panel --- */
+.info-panel { flex: 1.2; color: var(--white); padding-top: 20px; }
+.hero-quote h1 { font-size: 2.5rem; line-height: 1.1; margin-bottom: 15px; }
+.hero-quote p { opacity: 0.9; margin-bottom: 20px; border-top: 2px dotted #fff; padding-top: 20px; }

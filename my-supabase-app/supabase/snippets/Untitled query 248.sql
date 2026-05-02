@@ -1,3 +1,0 @@
-ALTER TABLE public.items 
-ADD COLUMN returned_at TIMESTAMP WITH TIME ZONE;
-
