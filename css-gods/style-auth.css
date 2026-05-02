@@ -247,6 +247,42 @@ body.auth-page-wrapper {
     font-size: 0.9rem;
     color: var(--text-light);
 }
+/* --- Add to Utilities --- */
+.link-text {
+    color: var(--cvsu-green);
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.link-text:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+/* --- Recovery Section Styling --- */
+#recoverySection {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#recoverySection .card-header {
+    text-align: center;
+    color: var(--cvsu-green);
+}
+
+#recoveryStep2 {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    margin-top: 5px;
+}
 
 /* Responsiveness for Smaller Screens */
 @media (max-width: 900px) {

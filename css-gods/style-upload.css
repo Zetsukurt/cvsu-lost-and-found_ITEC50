@@ -33,6 +33,60 @@ body.upload-wrapper {
 .nav-user { display: flex; align-items: center; gap: 15px; }
 .user-avatar { width: 35px; height: 35px; background: #fff; border-radius: 50%; }
 
+
+/* Existing nav-user update */
+.nav-user { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    position: relative; /* Essential for dropdown positioning */
+}
+
+.user-name-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--white);
+}
+
+.user-avatar-wrapper {
+    position: relative;
+}
+
+/* Logout Dropdown Styling */
+.user-dropdown {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 45px;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 8px;
+    z-index: 1000;
+    min-width: 110px;
+}
+
+.user-dropdown.active {
+    display: block;
+}
+
+.logout-action {
+    width: 100%;
+    padding: 8px;
+    background: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.logout-action:hover {
+    background: #b71c1c;
+}
+
 .upload-container { 
     display: flex; 
     padding: 20px 60px; 
@@ -186,7 +240,7 @@ textarea { height: 100px; resize: none; }
     border-radius: 12px;
 }
 
-.mine-btn {
+/* .mine-btn {
     background: var(--cvsu-green);
     color: white;
     border: none;
@@ -195,7 +249,7 @@ textarea { height: 100px; resize: none; }
     font-size: 0.75rem;
     font-weight: bold;
     cursor: pointer;
-}
+} */
 
 /* --- Info Panel --- */
 .info-panel { flex: 1.2; color: var(--white); padding-top: 20px; }
