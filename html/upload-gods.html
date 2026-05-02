@@ -11,19 +11,27 @@
 
     <nav class="navbar">
         <div class="nav-logo">
-            <span class="icon"></span>
+            <span class="icon">🔍</span>
             <span class="logo-text">Lost & Found Web</span>
         </div>
         <ul class="nav-links">
-            <li><a href="/html/home-gods.html">HOME</a></li>
-            <li><a href="/html/gallery-gods.html">PUBLIC GALLERY</a></li>
-            <li><a href="/html/my-found-items-gods.html">MY FOUND ITEMS</a></li>
-            <li><a href="/html/my-claims-gods.html">MY CLAIMS</a></li>
-            <li><a href="#" class="active">UPLOAD</a></li>
+            <li><a href="../html/home-gods.html" >HOME</a></li>
+            <li><a href="gallery.html">PUBLIC GALLERY</a></li>
+            <li><a href="#">MY FOUND ITEMS</a></li>
+            <li><a href="#">MY CLAIMS</a></li>
+            <li><a href="/html/upload-gods.html"class="active">UPLOAD</a></li>
         </ul>
+        <!-- Updated nav-user section -->
         <div class="nav-user">
-            <div class="user-avatar"></div>
-            <span class="menu-dots">⋮</span>
+            <span id="userNameDisplay" class="user-name-text"></span>
+            <div class="user-avatar-wrapper">
+                <div class="user-avatar"></div>
+                <!-- Hidden Logout Dropdown -->
+                <div id="userDropdown" class="user-dropdown">
+                    <button id="logoutBtn" class="logout-action">Logout</button>
+                </div>
+            </div>
+            <span id="menuToggle" class="menu-dots" style="cursor: pointer;">⋮</span>
         </div>
     </nav>
 
@@ -87,5 +95,6 @@
 
     <script src="../js/config.js"></script>
     <script src="../js/upload.js"></script>
+    <script src="../js/nav-func.js"></script>
 </body>
 </html>
