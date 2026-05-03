@@ -206,3 +206,66 @@ authForm.onsubmit = async (e) => {
         }
     }
 };
+
+// --- RECENT ITEMS CAROUSEL ---
+const items = [
+    document.getElementById('item1'),
+    document.getElementById('item2'),
+    document.getElementById('item3')
+];
+
+let positions = ['left', 'center', 'right'];
+let autoPlayInterval;
+const rotationSpeed = 4000; // 4 seconds per rotation
+
+function updateCarousel() {
+    items.forEach((item, index) => {
+        item.classList.remove('left', 'center', 'right');
+        item.classList.add(positions[index]);
+    });
+}
+
+// Logic for rotating next
+const nextSlide = () => {
+    positions.unshift(positions.pop());
+    updateCarousel();
+};
+
+// Logic for rotating previous
+const prevSlide = () => {
+    positions.push(positions.shift());
+    updateCarousel();
+};
+
+// --- AUTO-PLAY CONTROLS ---
+
+const startAutoPlay = () => {
+    autoPlayInterval = setInterval(nextSlide, rotationSpeed);
+};
+
+const stopAutoPlay = () => {
+    clearInterval(autoPlayInterval);
+};
+
+// Manual Navigation: Clicking a button resets the timer
+document.getElementById('nextBtn').onclick = () => {
+    stopAutoPlay();
+    nextSlide();
+    startAutoPlay();
+};
+
+document.getElementById('prevBtn').onclick = () => {
+    stopAutoPlay();
+    prevSlide();
+    startAutoPlay();
+};
+
+// Pause on Hover: Stops the rotation when the mouse is over the carousel
+const carouselContainer = document.querySelector('.carousel-container');
+
+carouselContainer.onmouseenter = stopAutoPlay;
+carouselContainer.onmouseleave = startAutoPlay;
+
+// Initialize
+updateCarousel();
+startAutoPlay();

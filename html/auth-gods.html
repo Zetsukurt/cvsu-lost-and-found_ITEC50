@@ -15,16 +15,22 @@
             <div class="branding-content">
                 <div class="logo-box">
                     <span class="logo-icon">
-                        <img src="../images/logo.png" alt ="Lost & Found Logo" class="logo-image">
+                        <img src="../images/luffy.png" alt ="Lost & Found Logo" class="logo-image">
                     </span>
                     <span class="logo-text">Lost & Found Web</span>
                 </div>
                 <h1 class="hero-text">EVERY LOST ITEM HAS A STORY. LET'S HELP IT FIND ITS WAY BACK</h1>
                 <p class="hero-subtext">A secure portal for reporting found items and reclaiming belongings within the CvSU community.</p>
-                <div class="carousel-visual">
-                    <div class="visual-item keys"></div>
-                    <div class="visual-item wallet"></div>
-                    <div class="visual-item watch"></div>
+                <div class="carousel-container">
+                    <button class="nav-btn prev" id="prevBtn">&larr;</button>
+                    
+                    <div class="carousel-visual">
+                        <div class="visual-item keys left" id="item1"></div>
+                        <div class="visual-item wallet center" id="item2"></div>
+                        <div class="visual-item watch right" id="item3"></div>
+                    </div>
+
+                    <button class="nav-btn next" id="nextBtn">&rarr;</button>
                 </div>
             </div>
         </section>
@@ -81,7 +87,8 @@
                     <div id="privacyGroup" class="checkbox-container">
                         <input type="checkbox" id="privacyPolicy">
                         <label for="privacyPolicy" class="checkbox-label">
-                            I agree that my information will be processed in accordance with the <strong>Data Privacy Act 2012</strong>.
+                           I understand and agree to the terms of the <b>Privacy Policy</b> and consent 
+                           to the processing of my data under the <b>Data Privacy Act of 2012</b>.
                         </label>
                     </div>
 

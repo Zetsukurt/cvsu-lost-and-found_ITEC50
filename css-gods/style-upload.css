@@ -97,7 +97,7 @@ body.upload-wrapper {
 
 /* --- Form Panel --- */
 .form-panel {
-    flex: 0.5;
+    flex: 0.7;
     background: var(--card-bg);
     border-radius: 40px;
     padding: 30px;
@@ -154,6 +154,18 @@ textarea { height: 100px; resize: none; }
 }
 
 /* Card Container Adjustments */
+
+.recent-section h3 {
+    font-family: 'Georgia', serif; /* Matching the serif look */
+    font-style: italic;
+    font-size: 1.6rem;
+    color:  #203820;/* Slightly off-white for that clean contrast */
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 400;
+    background-color: var(--card-bg);
+    border-radius: 20px;
+}
 .recent-grid {
     display: flex;
     gap: 20px;
@@ -165,10 +177,11 @@ textarea { height: 100px; resize: none; }
     background: var(--card-bg);
     width: 280px;
     border-radius: 20px;
-    padding: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    padding: 15px; /* Increased slightly for better breathability */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
     display: flex;
     flex-direction: column;
+    min-height: 320px; /* Ensures consistent card height */
 }
 
 .card-img {

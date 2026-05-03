@@ -59,6 +59,13 @@ body.auth-page-wrapper {
     letter-spacing: 1px;
 }
 
+.logo-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
 .hero-text {
     font-size: 2.2rem;
     line-height: 1.2;
@@ -74,7 +81,7 @@ body.auth-page-wrapper {
 
 /* --- Form Side (Right) --- */
 .form-side {
-    flex: 1.2;
+    flex: 1;
     padding: 30px 50px;
     display: flex;
     flex-direction: column;
@@ -128,29 +135,91 @@ body.auth-page-wrapper {
 }
 
 /* Stack the items */
+.carousel-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
 .carousel-visual {
     position: relative;
-    height: 300px;
-    margin-top: 50px;
+    height: 400px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px; /* Gives the 3D depth effect */
 }
 
 .visual-item {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: contain;
-    background-repeat: no-repeat;
+    width: 200px;
+    height: 280px;
+    border-radius: 20px;
+    background-size: cover;
     background-position: center;
-    opacity: 0;
-    animation: crossFade 12s infinite; /* 12s total loop */
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-/* Specific Delays */
-.visual-item.keys   { animation-delay: 0s; }
-.visual-item.wallet { animation-delay: 4s; }
-.visual-item.watch  { animation-delay: 8s; }
+/* Center Card - Highlighted */
+.visual-item.center {
+    z-index: 3;
+    transform: scale(1.1) translateX(0);
+    opacity: 1;
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+/* Side Cards - Faded and Behind */
+.visual-item.left {
+    z-index: 1;
+    transform: scale(0.8) translateX(-120px) rotateY(15deg);
+    opacity: 0.6;
+}
+
+.visual-item.right {
+    z-index: 1;
+    transform: scale(0.8) translateX(120px) rotateY(-15deg);
+    opacity: 0.6;
+}
+
+/* Navigation Buttons Styling */
+.nav-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid white;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+.nav-btn:hover { background: white; color: var(--cvsu-green); }
+
+.keys { 
+    background-image: url('../images/luffy.png'); 
+}
+
+.wallet { 
+    background-image: url('../images/luffy2.jpg'); 
+    animation-delay: 4s; /* Starts after 4 seconds */
+}
+
+.watch { 
+    background-image: url('../images/von.jpg'); 
+    animation-delay: 8s; /* Starts after 8 seconds */
+}
+
+
 
 @keyframes crossFade {
     0%, 8%   { opacity: 0; transform: translateY(10px); }
