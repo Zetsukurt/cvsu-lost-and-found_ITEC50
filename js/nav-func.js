@@ -38,7 +38,7 @@ async function initNavbar() {
         const { error } = await _supabase.auth.signOut();
         if (!error) {
             sessionStorage.removeItem('user_full_name'); // Clear cache on logout
-            window.location.href = 'login.html';
+            window.location.href = '../html/auth-gods.html';
         }
     };
 

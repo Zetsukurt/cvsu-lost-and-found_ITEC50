@@ -1,7 +1,7 @@
-// Initialize Supabase (Ensure these are in your config.js)
+// Initialize Supabase
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Existing UI Elements
+// UI Elements
 const authForm = document.getElementById('authForm');
 const loginTab = document.getElementById('loginTab');
 const signupTab = document.getElementById('signupTab');
@@ -14,7 +14,7 @@ const formTitle = document.getElementById('formTitle');
 const formSubtitle = document.getElementById('formSubtitle');
 const toggleLink = document.getElementById('toggleLink');
 
-// --- NEW RECOVERY ELEMENTS ---
+// Recovery Elements
 const forgotPasswordContainer = document.getElementById('forgotPasswordContainer');
 const forgotPasswordLink = document.getElementById('forgotPasswordLink');
 const recoverySection = document.getElementById('recoverySection');
@@ -31,7 +31,7 @@ const showLogin = () => {
     nameField.style.display = 'none';
     recoveryFields.style.display = 'none';
     privacyGroup.style.display = 'none';
-    forgotPasswordContainer.style.display = 'block'; // Show "Forgot Pass" link
+    forgotPasswordContainer.style.display = 'block'; 
     loginTab.classList.add('active');
     signupTab.classList.remove('active');
     formTitle.innerText = "Welcome Back";
@@ -39,7 +39,6 @@ const showLogin = () => {
     authBtn.innerText = "Login";
     message.innerText = "";
     
-    // Reset Recovery View if coming back
     recoverySection.style.display = 'none';
     authForm.style.display = 'flex';
     tabContainer.style.display = 'flex';
@@ -52,7 +51,7 @@ const showSignup = () => {
     nameField.style.display = 'flex';
     recoveryFields.style.display = 'flex';
     privacyGroup.style.display = 'flex';
-    forgotPasswordContainer.style.display = 'none'; // Hide "Forgot Pass" link
+    forgotPasswordContainer.style.display = 'none'; 
     signupTab.classList.add('active');
     loginTab.classList.remove('active');
     formTitle.innerText = "Create an Account";
@@ -61,7 +60,7 @@ const showSignup = () => {
     message.innerText = "";
 };
 
-// Switch to Recovery View
+// --- ADDED THIS MISSING FUNCTION ---
 const showRecovery = () => {
     authForm.style.display = 'none';
     tabContainer.style.display = 'none';
@@ -83,6 +82,10 @@ let recoveryTargetId = "";
 document.getElementById('getQuestionBtn').onclick = async () => {
     const studentId = document.getElementById('recoveryStudentId').value.trim();
     if (!studentId) return message.innerText = "Please enter your Student ID.";
+
+    if (studentId.length !== 9) {
+        return message.innerText = "Student ID must be exactly 9 digits.";
+    }
 
     message.innerText = "Verifying...";
     const { data, error } = await _supabase
@@ -112,7 +115,6 @@ document.getElementById('resetPassBtn').onclick = async () => {
 
     message.innerText = "Updating password...";
     
-    // Call the Postgres Function (RPC) you created in Step 1
     const { data: success, error } = await _supabase.rpc('reset_password_via_security_question', {
         target_student_id: recoveryTargetId,
         provided_answer: answer,
@@ -123,19 +125,24 @@ document.getElementById('resetPassBtn').onclick = async () => {
         message.innerText = "Error: " + error.message;
     } else if (success) {
         alert("Password reset successful! You can now log in.");
-        location.reload(); // Refresh to clean state
+        location.reload(); 
     } else {
         message.innerText = "Incorrect answer. Please try again.";
     }
 };
 
-// --- EXISTING AUTHENTICATION LOGIC ---
+// --- AUTHENTICATION & SIGNUP LOGIC ---
 authForm.onsubmit = async (e) => {
     e.preventDefault();
     message.innerText = "Processing...";
     
     const studentId = document.getElementById('studentId').value.trim();
     const password = document.getElementById('password').value;
+
+    if (studentId.length !== 9) {
+        return message.innerText = "Student ID must be exactly 9 digits.";
+    }
+
     const maskedEmail = `${studentId}@cvsu.edu.ph`;
 
     if (isLogin) {
@@ -151,28 +158,33 @@ authForm.onsubmit = async (e) => {
         }
 
     } else {
-        // Handle Sign Up
         const fullName = document.getElementById('fullName').value.trim();
         const question = document.getElementById('securityQuestion').value;
         const answer = document.getElementById('securityAnswer').value.trim().toLowerCase();
         const privacyChecked = document.getElementById('privacyPolicy').checked;
 
-        // 1. Basic Field Validation
         if (!fullName || !question || !answer) {
             return message.innerText = "Please fill in all fields.";
         }
-
-        // 2. Data Privacy Act Validation
         if (!privacyChecked) {
             return message.innerText = "You must agree to the Data Privacy Act.";
         }
 
-        // 3. Call Supabase Auth[cite: 3]
+        // Check if Student ID is already registered
+        const { data: existingProfile } = await _supabase
+            .from('profiles')
+            .select('student_id')
+            .eq('student_id', studentId)
+            .single();
+
+        if (existingProfile) {
+            return message.innerText = "Error: This Student ID is already registered.";
+        }
+
         const { error } = await _supabase.auth.signUp({
-            email: maskedEmail, // Uses the studentId@cvsu.edu.ph utility[cite: 3]
+            email: maskedEmail,
             password: password,
             options: {
-                // This data is stored in the user's metadata[cite: 3]
                 data: {
                     full_name: fullName,
                     student_id: studentId,
@@ -183,10 +195,14 @@ authForm.onsubmit = async (e) => {
         });
 
         if (error) {
-            message.innerText = error.message;
+            if (error.message.includes("User already registered")) {
+                message.innerText = "An account with this Student ID already exists.";
+            } else {
+                message.innerText = error.message;
+            }
         } else {
             alert("Registration successful! You can now log in.");
-            showLogin(); // Automatically switch the student to the Login view[cite: 3]
+            showLogin();
         }
-    }// ... (Keep existing signup logic here)
+    }
 };
