@@ -28,17 +28,30 @@ let isLogin = false; // Initial view is Sign Up
 // --- UI TOGGLE LOGIC ---
 const showLogin = () => {
     isLogin = true;
+    
+    // Field Visibility
     nameField.style.display = 'none';
     recoveryFields.style.display = 'none';
     privacyGroup.style.display = 'none';
     forgotPasswordContainer.style.display = 'block'; 
+    
+    // Tab Styling
     loginTab.classList.add('active');
     signupTab.classList.remove('active');
+    
+    // Text Content
     formTitle.innerText = "Welcome Back";
     formSubtitle.innerText = "Login with your Student ID";
     authBtn.innerText = "Login";
     message.innerText = "";
     
+    // --- DYNAMIC TOGGLE HINT (LOGIN VIEW) ---
+    // Changes the text before the span
+    toggleHint.childNodes[0].textContent = "Don't have an account? ";
+    // Changes the link text
+    toggleLink.innerText = "Sign Up";
+    
+    // Layout Reset
     recoverySection.style.display = 'none';
     authForm.style.display = 'flex';
     tabContainer.style.display = 'flex';
@@ -48,16 +61,26 @@ const showLogin = () => {
 
 const showSignup = () => {
     isLogin = false;
+    
+    // Field Visibility
     nameField.style.display = 'flex';
     recoveryFields.style.display = 'flex';
     privacyGroup.style.display = 'flex';
     forgotPasswordContainer.style.display = 'none'; 
+    
+    // Tab Styling
     signupTab.classList.add('active');
     loginTab.classList.remove('active');
+    
+    // Text Content
     formTitle.innerText = "Create an Account";
     formSubtitle.innerText = "Sign up to start your journey";
     authBtn.innerText = "Create Account";
     message.innerText = "";
+
+    // --- DYNAMIC TOGGLE HINT (SIGNUP VIEW) ---
+    toggleHint.childNodes[0].textContent = "Already have an account? ";
+    toggleLink.innerText = "Login";
 };
 
 // --- ADDED THIS MISSING FUNCTION ---
@@ -67,6 +90,8 @@ const showRecovery = () => {
     formDivider.style.display = 'none';
     toggleHint.style.display = 'none';
     recoverySection.style.display = 'flex';
+    formTitle.innerText = "Recover Password";
+    formSubtitle.innerText = "Enter Your Student ID to retrieve your security question";
     message.innerText = "";
 };
 
@@ -89,7 +114,7 @@ document.getElementById('getQuestionBtn').onclick = async () => {
 
     message.innerText = "Verifying...";
     const { data, error } = await _supabase
-        .from('profiles')
+        .from('public_recovery_questions')
         .select('security_question')
         .eq('student_id', studentId)
         .single();
@@ -207,6 +232,19 @@ authForm.onsubmit = async (e) => {
     }
 };
 
+const passwordInput = document.getElementById('password');
+const togglePassword = document.getElementById('togglePassword');
+
+togglePassword.addEventListener('click', function () {
+    // Check current type
+    const isPassword = passwordInput.getAttribute('type') === 'password';
+    
+    // Toggle Type
+    passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+    
+    // Toggle Text Content
+    this.textContent = isPassword ? 'Hide' : 'Show';
+});
 // --- RECENT ITEMS CAROUSEL ---
 const items = [
     document.getElementById('item1'),
