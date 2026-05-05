@@ -63,8 +63,11 @@
                     <!-- Shared: Password[cite: 1] -->
                     <div class="input-group">
                         <label class="label-text">Password</label>
-                        <input type="password" id="password" required placeholder="Enter your password" class="field-input">
-                        
+                        <div class="password-wrapper">
+                            <input type="password" id="password" required placeholder="Enter your password" class="field-input">
+                            <span id="togglePassword" class="password-toggle-icon">Show</span>
+                        </div>
+
                         <!-- NEW: Forgot Password Link (Only visible on Login tab) -->
                         <div id="forgotPasswordContainer" style="display: none; text-align: right; margin-top: 8px;">
                             <span id="forgotPasswordLink" class="link-text" style="font-size: 0.8rem; cursor: pointer;">Forgot Password?</span>
@@ -97,11 +100,8 @@
 
                 <!-- NEW: Recovery Section (Hidden by default) -->
                 <div id="recoverySection" class="form-layout" style="display: none;">
-                    <h3 class="card-header" style="font-size: 1.2rem; margin-bottom: 5px;">Account Recovery</h3>
-                    
                     <!-- Step 1: ID Verification -->
                     <div id="recoveryStep1">
-                        <p class="card-subheader" style="font-size: 0.8rem; margin-bottom: 15px;">Enter your Student ID to retrieve your question.</p>
                         <div class="input-group">
                             <label class="label-text">Student ID</label>
                             <input type="text" id="recoveryStudentId" placeholder="e.g. 202610123" class="field-input" inputmode="numeric" maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
@@ -111,7 +111,7 @@
 
                     <!-- Step 2: Answer & Reset -->
                     <div id="recoveryStep2" style="display: none;">
-                        <p id="displayQuestion" class="card-subheader" style="font-weight: bold; color: var(--cvsu-green); margin-bottom: 12px;"></p>
+                        <p id="displayQuestion" class="card-subheader"></p>
                         <div class="input-group">
                             <label class="label-text">Your Answer</label>
                             <input type="text" id="recoveryAnswer" placeholder="Answer here..." class="field-input">
@@ -124,13 +124,16 @@
                     </div>
                     
                     <p style="text-align: center; margin-top: 20px;">
-                        <span id="backToLogin" class="link-text" style="font-size: 0.8rem; cursor: pointer;">← Back to Login</span>
+                        <span id="backToLogin" class="link-text">← Back to Login</span>
                     </p>
                 </div>
                 
                 <p id="message" class="error-message"></p>
                 <div id="formDivider" class="divider"><span>OR</span></div>
-                <p id="toggleHint" class="toggle-hint">Already have an account? <span id="toggleLink" class="link-text" style="cursor:pointer; color:var(--cvsu-green); font-weight:bold;">Login</span></p>
+                <p id="toggleHint" class="toggle-hint">
+                    Don't have an account? 
+                    <span id="toggleLink" class="text-link-sm">Login</span></p>
+                </p>    
             </div>
         </section>
     </main>

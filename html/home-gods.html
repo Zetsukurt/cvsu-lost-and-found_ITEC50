@@ -15,7 +15,7 @@
             <span class="logo-text">Lost & Found Web</span>
         </div>
         <ul class="nav-links">
-            <li><a href="index.html" class="active">HOME</a></li>
+            <li><a href="#" class="active">HOME</a></li>
             <li><a href="gallery.html">PUBLIC GALLERY</a></li>
             <li><a href="#">MY FOUND ITEMS</a></li>
             <li><a href="#">MY CLAIMS</a></li>
@@ -43,25 +43,28 @@
                 <p>A secure platform for reporting found items and reclaiming lost belongings through an anonymous, community-driven gallery. It’s the simplest way to find what’s yours and safely return what isn’t.</p>
             </div>
 
+
             <!-- Carousel Component -->
-            <div class="carousel-container">
-                <div class="carousel-track">
-                    <div class="carousel-item keys"></div>
-                    <div class="carousel-item wallet active"></div>
-                    <div class="carousel-item watch"></div>
+                <div class="carousel-container">
+                    <div class="carousel-visual">
+                        <div class="visual-item keys left" id="item1"></div>
+                        <div class="visual-item wallet center" id="item2"></div>
+                        <div class="visual-item watch right" id="item3"></div>
+                    </div>
                 </div>
-                <div class="carousel-dots">
-                   <span class="active"></span>
-                </div>
-            </div>
+
+                <div class="dots-navigation">
+                    <span class="dot" onclick="jumpToSlide(0)"></span>
+                    <span class="dot" onclick="jumpToSlide(1)"></span>
+                    <span class="dot" onclick="jumpToSlide(2)"></span>
+                </div>   
+             
         </section>
 
         <!-- Right Section: Categories Card -->
         <aside class="categories-panel">
             <div class="search-bar-container">
                 <input type="text" placeholder="Search your item here" class="search-input">
-                <button class="search-btn">🔍</button>
-                <button class="filter-btn">⚙️</button>
             </div>
 
             <div class="categories-container">
