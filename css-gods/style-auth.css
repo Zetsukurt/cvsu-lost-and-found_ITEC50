@@ -102,6 +102,13 @@ body.auth-page-wrapper {
     font-size: 0.9rem;
     color: var(--text-light);
     margin-bottom: 20px;
+    font-weight: bold; 
+    color: var(--cvsu-green); 
+    margin-bottom: 12px;
+}
+
+.card-subheader::first-letter {
+    text-transform: uppercase;
 }
 
 /* --- Tab Navigation --- */
@@ -240,6 +247,36 @@ body.auth-page-wrapper {
     gap: 8px;
 }
 
+/* Container must be relative so the icon can be absolute inside it */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Adjust the input to make room for the text/icon on the right */
+.password-wrapper .field-input {
+    padding-right: 60px; /* Prevents text from going under the 'Show' link */
+    width: 100%;
+}
+
+/* Pin the toggle to the right side */
+.password-toggle-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--cvsu-green); /* Matching your earthy theme */
+    user-select: none;
+    transition: opacity 0.2s;
+}
+
+.password-toggle-icon:hover {
+    opacity: 0.7;
+}
+
 .label-text {
     font-size: 0.9rem;
     font-weight: 600;
@@ -260,6 +297,8 @@ body.auth-page-wrapper {
     border-color: var(--cvsu-green);
     box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
 }
+
+.text-link-sm {cursor:pointer; color:var(--cvsu-green); font-weight:bold;}
 
 /* --- Checkbox Styling --- */
 .checkbox-container {
@@ -322,6 +361,8 @@ body.auth-page-wrapper {
     font-weight: 700;
     cursor: pointer;
     transition: var(--transition);
+    font-size: 0.8rem; 
+    cursor: pointer;
 }
 
 .link-text:hover {
