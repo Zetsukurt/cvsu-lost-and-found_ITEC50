@@ -188,6 +188,24 @@ COMMENT ON TABLE "public"."profiles" IS '@graphql({"enabled": false})';
 
 
 
+CREATE OR REPLACE VIEW "public"."public_recovery_questions" AS
+ SELECT "student_id",
+    "security_question"
+   FROM "public"."profiles";
+
+
+ALTER VIEW "public"."public_recovery_questions" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "public"."public_security_questions" AS
+ SELECT "student_id",
+    "security_question"
+   FROM "public"."profiles";
+
+
+ALTER VIEW "public"."public_security_questions" OWNER TO "postgres";
+
+
 ALTER TABLE ONLY "public"."claims"
     ADD CONSTRAINT "claims_pkey" PRIMARY KEY ("id");
 
@@ -281,6 +299,10 @@ ALTER TABLE "public"."profiles" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
+
+
+
+
 
 
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."items";
@@ -499,6 +521,18 @@ GRANT ALL ON TABLE "public"."items" TO "service_role";
 GRANT ALL ON TABLE "public"."profiles" TO "anon";
 GRANT ALL ON TABLE "public"."profiles" TO "authenticated";
 GRANT ALL ON TABLE "public"."profiles" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."public_recovery_questions" TO "anon";
+GRANT ALL ON TABLE "public"."public_recovery_questions" TO "authenticated";
+GRANT ALL ON TABLE "public"."public_recovery_questions" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."public_security_questions" TO "anon";
+GRANT ALL ON TABLE "public"."public_security_questions" TO "authenticated";
+GRANT ALL ON TABLE "public"."public_security_questions" TO "service_role";
 
 
 

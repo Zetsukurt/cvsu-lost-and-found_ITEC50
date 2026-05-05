@@ -4,7 +4,7 @@ SET session_replication_role = replica;
 -- PostgreSQL database dump
 --
 
--- \restrict tMOxDab375ytoAukhNSbomMRxAxuZJs12l2wjzgzDFs7TgRiorAwli7EZLledlU
+-- \restrict VO5Ag36arokm6sHVnymUkISfQ40lP4I8vtqmv9XtzzmR8ydQyObq1Afm5OeN9S5
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -44,7 +44,18 @@ INSERT INTO "auth"."audit_log_entries" ("instance_id", "id", "payload", "created
 	('00000000-0000-0000-0000-000000000000', '91a54273-ad44-4eb8-a3d2-9659901e17ad', '{"action":"logout","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"account"}', '2026-05-03 09:44:33.635124+00', ''),
 	('00000000-0000-0000-0000-000000000000', '99ea4a21-b6e1-43e4-9964-361af1280a4f', '{"action":"login","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"account","traits":{"provider":"email"}}', '2026-05-03 09:46:15.781235+00', ''),
 	('00000000-0000-0000-0000-000000000000', 'dcc0b33a-7776-4071-bd1e-2b966b1d6c5e', '{"action":"logout","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"account"}', '2026-05-03 09:46:23.555655+00', ''),
-	('00000000-0000-0000-0000-000000000000', '49396764-5be7-4530-aeb0-80470e0a8999', '{"action":"login","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"account","traits":{"provider":"email"}}', '2026-05-03 10:08:44.464166+00', '');
+	('00000000-0000-0000-0000-000000000000', '49396764-5be7-4530-aeb0-80470e0a8999', '{"action":"login","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"account","traits":{"provider":"email"}}', '2026-05-03 10:08:44.464166+00', ''),
+	('00000000-0000-0000-0000-000000000000', 'd31ed77f-69a8-4dd6-98b3-4c47b4839a1e', '{"action":"token_refreshed","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"token"}', '2026-05-05 08:18:59.688954+00', ''),
+	('00000000-0000-0000-0000-000000000000', '2e4d4148-dd11-4c91-9df9-fd05abe5a241', '{"action":"token_revoked","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"token"}', '2026-05-05 08:18:59.71412+00', ''),
+	('00000000-0000-0000-0000-000000000000', '78d0981c-0810-4916-84cb-343dbd4b82ca', '{"action":"token_refreshed","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"token"}', '2026-05-05 09:38:05.716239+00', ''),
+	('00000000-0000-0000-0000-000000000000', '3cbb02ce-e94f-4d2c-89e2-01d4a71416b0', '{"action":"token_revoked","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"token"}', '2026-05-05 09:38:05.739031+00', ''),
+	('00000000-0000-0000-0000-000000000000', 'b54dd1cc-e3f5-4fb4-90b5-09ccfc2728b4', '{"action":"logout","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"account"}', '2026-05-05 10:25:31.610677+00', ''),
+	('00000000-0000-0000-0000-000000000000', '4a920f23-7abf-49ea-b49b-583079dbbd34', '{"action":"login","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"account","traits":{"provider":"email"}}', '2026-05-05 11:00:59.73298+00', ''),
+	('00000000-0000-0000-0000-000000000000', '5282697b-a359-4058-8725-82a6910eb007', '{"action":"logout","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"account"}', '2026-05-05 11:01:04.389222+00', ''),
+	('00000000-0000-0000-0000-000000000000', '3067fa79-60fa-48a5-a816-d160ab4b6beb', '{"action":"login","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"account","traits":{"provider":"email"}}', '2026-05-05 11:21:14.360211+00', ''),
+	('00000000-0000-0000-0000-000000000000', '5ea0380f-bc59-471e-9831-97d6683047e1', '{"action":"logout","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"account"}', '2026-05-05 11:21:18.086095+00', ''),
+	('00000000-0000-0000-0000-000000000000', '87365e79-fa45-4a07-af9b-28bb13682617', '{"action":"login","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"account","traits":{"provider":"email"}}', '2026-05-05 11:29:37.217017+00', ''),
+	('00000000-0000-0000-0000-000000000000', '3d8a2ed4-cd03-4ffd-bef7-3245780e72ce', '{"action":"logout","actor_id":"d35efff1-94f0-45f4-8027-d385344bb40c","actor_name":"zeto cabahug","actor_username":"251011821@cvsu.edu.ph","actor_via_sso":false,"log_type":"account"}', '2026-05-05 11:29:40.207928+00', '');
 
 
 --
@@ -64,7 +75,7 @@ INSERT INTO "auth"."audit_log_entries" ("instance_id", "id", "payload", "created
 --
 
 INSERT INTO "auth"."users" ("instance_id", "id", "aud", "role", "email", "encrypted_password", "email_confirmed_at", "invited_at", "confirmation_token", "confirmation_sent_at", "recovery_token", "recovery_sent_at", "email_change_token_new", "email_change", "email_change_sent_at", "last_sign_in_at", "raw_app_meta_data", "raw_user_meta_data", "is_super_admin", "created_at", "updated_at", "phone", "phone_confirmed_at", "phone_change", "phone_change_token", "phone_change_sent_at", "email_change_token_current", "email_change_confirm_status", "banned_until", "reauthentication_token", "reauthentication_sent_at", "is_sso_user", "deleted_at", "is_anonymous") VALUES
-	('00000000-0000-0000-0000-000000000000', 'd35efff1-94f0-45f4-8027-d385344bb40c', 'authenticated', 'authenticated', '251011821@cvsu.edu.ph', '$2a$06$uT.7MsL0PdjTue7p4E02nO9bVe/4QkKdVW3NQzjfTQAezFuH/WZpm', '2026-04-30 14:20:59.254362+00', NULL, '', NULL, '', NULL, '', '', NULL, '2026-05-03 10:08:44.471288+00', '{"provider": "email", "providers": ["email"]}', '{"sub": "d35efff1-94f0-45f4-8027-d385344bb40c", "email": "251011821@cvsu.edu.ph", "full_name": "zeto cabahug", "student_id": "251011821", "email_verified": true, "phone_verified": false, "security_answer": "manila", "security_question": "city"}', NULL, '2026-04-30 14:20:59.130828+00', '2026-05-03 10:08:44.500866+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
+	('00000000-0000-0000-0000-000000000000', 'd35efff1-94f0-45f4-8027-d385344bb40c', 'authenticated', 'authenticated', '251011821@cvsu.edu.ph', '$2a$06$wwnYiH1tr6lNSYQI7EUhDO.V9rdJNKNIp9sy08/0WygsePe6S.zde', '2026-04-30 14:20:59.254362+00', NULL, '', NULL, '', NULL, '', '', NULL, '2026-05-05 11:29:37.220434+00', '{"provider": "email", "providers": ["email"]}', '{"sub": "d35efff1-94f0-45f4-8027-d385344bb40c", "email": "251011821@cvsu.edu.ph", "full_name": "zeto cabahug", "student_id": "251011821", "email_verified": true, "phone_verified": false, "security_answer": "manila", "security_question": "city"}', NULL, '2026-04-30 14:20:59.130828+00', '2026-05-05 11:29:37.227685+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
 
 
 --
@@ -91,16 +102,12 @@ INSERT INTO "auth"."identities" ("provider_id", "user_id", "identity_data", "pro
 -- Data for Name: sessions; Type: TABLE DATA; Schema: auth; Owner: supabase_auth_admin
 --
 
-INSERT INTO "auth"."sessions" ("id", "user_id", "created_at", "updated_at", "factor_id", "aal", "not_after", "refreshed_at", "user_agent", "ip", "tag", "oauth_client_id", "refresh_token_hmac_key", "refresh_token_counter", "scopes") VALUES
-	('8da1f7d2-3da0-4b11-88ae-3319be7feea4', 'd35efff1-94f0-45f4-8027-d385344bb40c', '2026-05-03 10:08:44.471627+00', '2026-05-03 10:08:44.471627+00', NULL, 'aal1', NULL, NULL, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 OPR/130.0.0.0', '172.18.0.1', NULL, NULL, NULL, NULL, NULL);
 
 
 --
 -- Data for Name: mfa_amr_claims; Type: TABLE DATA; Schema: auth; Owner: supabase_auth_admin
 --
 
-INSERT INTO "auth"."mfa_amr_claims" ("session_id", "created_at", "updated_at", "authentication_method", "id") VALUES
-	('8da1f7d2-3da0-4b11-88ae-3319be7feea4', '2026-05-03 10:08:44.503513+00', '2026-05-03 10:08:44.503513+00', 'password', '061af476-6bf3-43ab-9c3f-66f223c055d7');
 
 
 --
@@ -143,8 +150,6 @@ INSERT INTO "auth"."mfa_amr_claims" ("session_id", "created_at", "updated_at", "
 -- Data for Name: refresh_tokens; Type: TABLE DATA; Schema: auth; Owner: supabase_auth_admin
 --
 
-INSERT INTO "auth"."refresh_tokens" ("instance_id", "id", "token", "user_id", "revoked", "created_at", "updated_at", "parent", "session_id") VALUES
-	('00000000-0000-0000-0000-000000000000', 11, 'vq5miez2p2g6', 'd35efff1-94f0-45f4-8027-d385344bb40c', false, '2026-05-03 10:08:44.492417+00', '2026-05-03 10:08:44.492417+00', NULL, '8da1f7d2-3da0-4b11-88ae-3319be7feea4');
 
 
 --
@@ -277,7 +282,7 @@ INSERT INTO "storage"."objects" ("id", "bucket_id", "name", "owner", "created_at
 -- Name: refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: auth; Owner: supabase_auth_admin
 --
 
-SELECT pg_catalog.setval('"auth"."refresh_tokens_id_seq"', 11, true);
+SELECT pg_catalog.setval('"auth"."refresh_tokens_id_seq"', 16, true);
 
 
 --
@@ -291,6 +296,6 @@ SELECT pg_catalog.setval('"supabase_functions"."hooks_id_seq"', 1, false);
 -- PostgreSQL database dump complete
 --
 
--- \unrestrict tMOxDab375ytoAukhNSbomMRxAxuZJs12l2wjzgzDFs7TgRiorAwli7EZLledlU
+-- \unrestrict VO5Ag36arokm6sHVnymUkISfQ40lP4I8vtqmv9XtzzmR8ydQyObq1Afm5OeN9S5
 
 RESET ALL;
