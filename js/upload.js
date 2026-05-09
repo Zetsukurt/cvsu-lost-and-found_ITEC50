@@ -62,7 +62,7 @@ uploadForm.addEventListener('submit', async (e) => {
         uploadForm.reset();
         fileNameDisplay.innerText = "No file chosen";
 
-        fetchRecentItems(); // Refresh the recent items section after a new upload
+        fetchUserRecentItems(); // Refresh the recent items section after a new upload
 
     } catch (error) {
         console.error("Detailed Error:", error);
@@ -73,8 +73,16 @@ uploadForm.addEventListener('submit', async (e) => {
     }
 });
 
-async function fetchRecentItems() {
-    // We use 'profiles(full_name)' to join the profiles table via reporter_id
+async function fetchUserRecentItems() {
+    // 1. Get the currently logged-in user's information
+    const { data: { user }, error: userError } = await _supabase.auth.getUser();
+
+    if (userError || !user) {
+        console.error("No logged-in user found.");
+        return;
+    }
+
+    // 2. Query only items reported by THIS specific user
     const { data, error } = await _supabase
         .from('items')
         .select(`
@@ -83,6 +91,8 @@ async function fetchRecentItems() {
                 full_name
             )
         `)
+        .eq('reporter_id', user.id) 
+        // ----------------
         .order('created_at', { ascending: false })
         .limit(2);
 
@@ -94,27 +104,26 @@ async function fetchRecentItems() {
     const grid = document.getElementById('recentGrid');
     if (!grid) return;
 
-    grid.innerHTML = data.map(item => `
-        <div class="item-card">
-            <img src="${item.image_url}" class="card-img" alt="Found Item">
-            
-            <div class="card-info">
-                <div class="title-row">
-                    <h4>${item.title}</h4>
-                    <span class="cat-tag">${item.category}</span>
-                </div>
-                
-                <span class="loc-text">📍 Found: ${item.location_found}</span>
-                
-                <p class="reporter-name">${item.profiles?.full_name || 'Anonymous'}</p>
-                
-                <div class="card-footer">
-                    <span class="status-tag">${item.status === 'found' ? 'Available' : item.status}</span>
+    // 3. Render the personal items
+    grid.innerHTML = data.length > 0 
+        ? data.map(item => `
+            <div class="item-card">
+                <img src="${item.image_url}" class="card-img" alt="Found Item">
+                <div class="card-info">
+                    <div class="title-row">
+                        <h4>${item.title}</h4>
+                        <span class="cat-tag">${item.category}</span>
+                    </div>
+                    <span class="loc-text">📍 Found: ${item.location_found}</span>
+                    <p class="reporter-name">Reported by: ${item.profiles?.full_name || 'You'}</p>
+                    <div class="card-footer">
+                        <span class="status-tag">${item.status === 'found' ? 'Available' : item.status}</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `).join('')
+        : `<p class="no-items">No recent reports found. Start helping the community!</p>`;
 }
 
 // 5. CALL ON LOAD
-document.addEventListener('DOMContentLoaded', fetchRecentItems);
+document.addEventListener('DOMContentLoaded', fetchUserRecentItems);
