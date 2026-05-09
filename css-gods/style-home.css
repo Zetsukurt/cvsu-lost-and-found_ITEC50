@@ -90,7 +90,7 @@ body.home-wrapper {
 /* --- Main Content --- */
 .main-content {
     display: flex;
-    padding: 40px 60px;
+    padding: 30px 60px;
     height: calc(100vh - 80px);
 }
 
@@ -122,8 +122,8 @@ body.home-wrapper {
 
 .visual-item {
     position: absolute;
-    width: 200px;
-    height: 280px;
+    width: 250px;
+    height: 350px;
     border-radius: 20px;
     background-size: cover;
     background-position: center;
@@ -142,13 +142,13 @@ body.home-wrapper {
 /* Side Cards - Faded and Behind */
 .visual-item.left {
     z-index: 1;
-    transform: scale(0.8) translateX(-120px) rotateY(15deg);
+    transform: scale(0.8) translateX(-200px) rotateY(15deg);
     opacity: 0.6;
 }
 
 .visual-item.right {
     z-index: 1;
-    transform: scale(0.8) translateX(120px) rotateY(-15deg);
+    transform: scale(0.8) translateX(200px) rotateY(-15deg);
     opacity: 0.6;
 }
 
@@ -198,6 +198,7 @@ body.home-wrapper {
     gap: 12px;
     position: relative;
     z-index: 10;
+    margin-top: 20px;
 }
 
 .dot {
