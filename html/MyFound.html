@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - Lost & Found Web</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css-gods/style-MyFound.css">
+    <script src="../js/supabase.js"></script>
+</head>
+
+<body class="gallery-wrapper">
+
+    <nav class="navbar">
+        <div class="nav-logo">
+            <span class="icon"></span>
+            <span class="logo-text">Lost & Found Web</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/html/home-gods.html">HOME</a></li>
+            <li><a href="/html/Gallery.html" class="active">PUBLIC GALLERY</a></li>
+            <li><a href="/html/MyFound.html">MY FOUND ITEMS</a></li>
+            <li><a href="/html/MyClaims.html">MY CLAIMS</a></li>
+            <li><a href="/html/upload-gods.html">UPLOAD</a></li>
+        </ul>
+        <div class="nav-user">
+            <span id="userNameDisplay" class="user-name-text"></span>
+            <div class="user-avatar-wrapper">
+                <div class="user-avatar"></div>
+                <div id="userDropdown" class="user-dropdown">
+                    <button id="logoutBtn" class="logout-action">Logout</button>
+                </div>
+            </div>
+            <span id="menuToggle" class="menu-dots" style="cursor: pointer;">⋮</span>
+        </div>
+    </nav>
+
+    <main class="dashboard-content">
+
+        <section id="public-gallery" class="tab-section active">
+            <div class="search-bar-container gallery-search">
+                <i class="fas fa-search" style="color: #888;"></i>
+                <input type="text" placeholder="Search for items..." class="search-input">
+            </div>
+
+            <div class="filter-group">
+                <button class="filter-pill active">All</button>
+                <button class="filter-pill">Electronics</button>
+                <button class="filter-pill">Documents</button>
+                <button class="filter-pill">Personal Items</button>
+                <button class="filter-pill">Clothing</button>
+            </div>
+
+            <div class="items-grid">
+                <div class="item-card solid-shadow">
+                    <div class="card-img-placeholder"><i class="fas fa-id-card"></i></div>
+                    <div class="card-header">
+                        <h2>ID</h2>
+                        <span class="cat-tag tag-dark">Document</span>
+                    </div>
+                    <div class="loc-text"><i class="fas fa-map-marker-alt" style="color: #d32f2f;"></i> Found: CEIT
+                    </div>
+                    <div class="card-footer">
+                        <div class="reporter-info">
+                            <span class="name">NAME1</span>
+                            <span class="status-badge available">Available</span>
+                        </div>
+                        <button class="action-btn-mine">That's Mine!</button>
+                    </div>
+                </div>
+
+                <div class="item-card solid-shadow">
+                    <div class="card-img-placeholder"><i class="fas fa-mobile-alt"></i></div>
+                    <div class="card-header">
+                        <h2>iPhone</h2>
+                        <span class="cat-tag tag-dark">Electronics</span>
+                    </div>
+                    <div class="loc-text"><i class="fas fa-map-marker-alt" style="color: #d32f2f;"></i> Found: CEIT
+                    </div>
+                    <div class="card-footer">
+                        <div class="reporter-info">
+                            <span class="name">NAME2</span>
+                            <span class="status-badge claimed">Claimed</span>
+                        </div>
+                        <button class="action-btn-mine">That's Mine!</button>
+                    </div>
+                </div>
+
+                <div class="item-card solid-shadow">
+                    <div class="card-img-placeholder"><i class="fas fa-box"></i></div>
+                    <div class="card-header">
+                        <h2>Hirono</h2>
+                        <span class="cat-tag tag-dark">Personal Items</span>
+                    </div>
+                    <div class="loc-text"><i class="fas fa-map-marker-alt" style="color: #d32f2f;"></i> Found: CEIT
+                    </div>
+                    <div class="card-footer">
+                        <div class="reporter-info">
+                            <span class="name">NAME3</span>
+                            <span class="status-badge pending">Pending id</span>
+                        </div>
+                        <button class="action-btn-mine">That's Mine!</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="my-claims" class="tab-section">
+            <div class="dashboard-header">
+                <div class="header-text">
+                    <h1>My Claims Items</h1>
+                    <p>View and manage the items you have reported as found. Track their status and claim here.</p>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <i class="fas fa-box-open stat-icon"></i>
+                        <div class="stat-content">
+                            <h4>TOTAL CLAIMS ITEMS</h4>
+                            <h2>12</h2>
+                            <p>Items you've reported</p>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fas fa-clock stat-icon"></i>
+                        <div class="stat-content">
+                            <h4>PENDING</h4>
+                            <h2>12</h2>
+                            <p>Awaiting verification</p>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fas fa-check-circle stat-icon"></i>
+                        <div class="stat-content">
+                            <h4>APPROVED</h4>
+                            <h2>12</h2>
+                            <p>Ready for pickup</p>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fas fa-times-circle stat-icon"></i>
+                        <div class="stat-content">
+                            <h4>REJECTED</h4>
+                            <h2>12</h2>
+                            <p>Claims not approved</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <button class="filter-pill active">All</button>
+                <button class="filter-pill">Pending</button>
+                <button class="filter-pill">Approved</button>
+                <button class="filter-pill">Rejected</button>
+            </div>
+
+            <div class="items-grid">
+                <div class="item-card solid-shadow detail-card">
+                    <div class="card-header">
+                        <h2>ID</h2>
+                        <span class="status-pill rejected">Rejected</span>
+                    </div>
+                    <div class="loc-text"><i class="fas fa-map-marker-alt" style="color: #d32f2f;"></i> Initially found
+                        at: CEIT</div>
+                    <div class="proof-container">
+                        <label>YOUR PROOF SUBMITTED:</label>
+                        <p>"Akin yan boss"</p>
+                    </div>
+                </div>
+
+                <div class="item-card solid-shadow detail-card">
+                    <div class="card-header">
+                        <h2>Phone</h2>
+                        <span class="status-pill approved">Approved</span>
+                    </div>
+                    <div class="loc-text"><i class="fas fa-map-marker-alt" style="color: #d32f2f;"></i> Initially found
+                        at: DIT Lobby</div>
+                    <div class="proof-container">
+                        <label>YOUR PROOF SUBMITTED:</label>
+                        <p>"Nanjan lahat ng hot pics ko kaya please ibalik mo yn sakin!"</p>
+                    </div>
+                    <div class="action-alert">
+                        <label>READY FOR PICKUP!</label>
+                        <p>Proceed to <u>DIT Guardhouse</u> with your ID.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="my-found-items" class="tab-section">
+            <div class="dashboard-header">
+                <div class="header-text">
+                    <h1>My Found Items</h1>
+                    <p>View and manage the items you have reported as found. Track their status and claim here.</p>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <i class="fas fa-check-double stat-icon"></i>
+                        <div class="stat-content">
+                            <h4>AVAILABLE</h4>
+                            <h2>12</h2>
+                            <p>Ready for pickup</p>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fas fa-handshake stat-icon"></i>
+                        <div class="stat-content">
+                            <h4>RETURNED</h4>
+                            <h2>12</h2>
+                            <p>Ready for pickup</p>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fas fa-clock stat-icon"></i>
+                        <div class="stat-content">
+                            <h4>PENDING</h4>
+                            <h2>12</h2>
+                            <p>Ready for pickup</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <button class="filter-pill active">All</button>
+                <button class="filter-pill">Electronics</button>
+                <button class="filter-pill">Documents</button>
+                <button class="filter-pill">Personal Items</button>
+                <button class="filter-pill">Clothing</button>
+            </div>
+
+            <div class="items-grid">
+                <div class="item-card solid-shadow detail-card">
+                    <div class="card-header">
+                        <h2>ID</h2>
+                        <span class="status-pill returned">Returned</span>
+                    </div>
+                    <div class="loc-text"><i class="fas fa-map-marker-alt" style="color: #d32f2f;"></i> Initially found
+                        at: CEIT</div>
+                    <div class="proof-container">
+                        <label>YOUR PROOF SUBMITTED:</label>
+                        <p>"Akin yan boss"</p>
+                    </div>
+                </div>
+
+                <div class="item-card solid-shadow detail-card">
+                    <div class="card-header">
+                        <h2>Phone</h2>
+                        <span class="status-pill available">Available</span>
+                    </div>
+                    <div class="loc-text"><i class="fas fa-map-marker-alt" style="color: #d32f2f;"></i> Initially found
+                        at: DIT Lobby</div>
+                    <div class="proof-container">
+                        <label>YOUR PROOF SUBMITTED:</label>
+                        <p>"Nanjan lahat ng hot pics ko kaya please ibalik mo yn sakin!"</p>
+                    </div>
+                    <div class="action-alert">
+                        <label>READY FOR PICKUP!</label>
+                        <p>Proceed to <u>DIT Guardhouse</u> with your ID.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/nav-func.js"></script>
+    <script src="js/gallery.js"></script>
+
+</body>
+
+</html>

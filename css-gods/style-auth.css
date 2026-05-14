@@ -79,19 +79,20 @@ body.auth-page-wrapper {
     margin-bottom: 40px;
 }
 
-/* --- Form Side (Right) --- */
 .form-side {
     flex: 1;
     padding: 30px 50px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    overflow-y: hidden;
+    justify-content: flex-start; /* Changed from center to prevent top-cutoff */
+    overflow-y: auto; /* Changed to auto to allow scrolling */
     background-color: var(--white);
 }
-
-.auth-card { width: 100%; }
-
+.auth-card {
+    width: 100%;
+    margin: auto 0; /* This helps keep it centered when there is extra space */
+    padding: 20px 0; /* Gives a little buffer at the top and bottom */
+}
 .card-header {
     font-size: 1.6rem;
     color: var(--text-dark);
@@ -238,7 +239,7 @@ body.auth-page-wrapper {
 .form-layout {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 .input-group {

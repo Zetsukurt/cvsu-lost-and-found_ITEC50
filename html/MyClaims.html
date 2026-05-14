@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Claims - Lost & Found Web</title>
+    <link rel="stylesheet" href="/css-gods/style-MyClaims.css">
+    <!-- Assuming supabase is initialized elsewhere -->
+    <script src="../js/supabase.js"></script>
+</head>
+
+<body class="claims-wrapper">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <span class="icon">🔍</span>
+            <span class="logo-text">Lost & Found Web</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/html/home-gods.html">HOME</a></li>
+            <li><a href="/html/Gallery.html" class="active">PUBLIC GALLERY</a></li>
+            <li><a href="/html/MyFound.html">MY FOUND ITEMS</a></li>
+            <li><a href="/html/MyClaims.html">MY CLAIMS</a></li>
+            <li><a href="/html/upload-gods.html">UPLOAD</a></li>
+        </ul>
+        <div class="nav-user">
+            <span id="userNameDisplay" class="user-name-text"></span>
+            <div class="user-avatar-wrapper">
+                <div class="user-avatar"></div>
+                <div id="userDropdown" class="user-dropdown">
+                    <button id="logoutBtn" class="logout-action">Logout</button>
+                </div>
+            </div>
+            <span id="menuToggle" class="menu-dots" style="cursor: pointer;">⋮</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-claims-content">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+                <h2>My Claims Items</h2>
+                <p>View and manage the items you have reported as found. Track their status and claim here.</p>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <h5>TOTAL CLAIMS ITEMS</h5>
+                        <h3 id="stat-total">0</h3>
+                        <p>Items you've reported</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🕒</div>
+                    <div class="stat-info">
+                        <h5>PENDING</h5>
+                        <h3 id="stat-pending">0</h3>
+                        <p>Awaiting verification</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <h5>APPROVED</h5>
+                        <h3 id="stat-approved">0</h3>
+                        <p>Ready for pickup</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">❌</div>
+                    <div class="stat-info">
+                        <h5>REJECTED</h5>
+                        <h3 id="stat-rejected">0</h3>
+                        <p>Claims not approved</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-container">
+            <button class="filter-btn active" data-filter="All">All</button>
+            <button class="filter-btn" data-filter="Pending">Pending</button>
+            <button class="filter-btn" data-filter="Approved">Approved</button>
+            <button class="filter-btn" data-filter="Rejected">Rejected</button>
+        </div>
+
+        <!-- Dynamic Claims Grid -->
+        <div id="dynamic-claims-container" class="claims-grid">
+            <!-- JavaScript will populate cards here -->
+        </div>
+    </main>
+
+    <script src="claims.js"></script>
+</body>
+
+</html>

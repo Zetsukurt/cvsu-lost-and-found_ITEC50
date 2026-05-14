@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Gallery - Lost & Found Web</title>
+    <link rel="stylesheet" href="/css-gods/style-gallery.css">
+    <script src="../js/supabase.js"></script>
+</head>
+
+<body class="gallery-wrapper">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <span class="icon"></span>
+            <span class="logo-text">Lost & Found Web</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/html/home-gods.html">HOME</a></li>
+            <li><a href="/html/Gallery.html" class="active">PUBLIC GALLERY</a></li>
+            <li><a href="/html/MyFound.html">MY FOUND ITEMS</a></li>
+            <li><a href="/html/MyClaims.html">MY CLAIMS</a></li>
+            <li><a href="/html/upload-gods.html">UPLOAD</a></li>
+        </ul>
+        <div class="nav-user">
+            <span id="userNameDisplay" class="user-name-text"></span>
+            <div class="user-avatar-wrapper">
+                <div class="user-avatar"></div>
+                <div id="userDropdown" class="user-dropdown">
+                    <button id="logoutBtn" class="logout-action">Logout</button>
+                </div>
+            </div>
+            <span id="menuToggle" class="menu-dots">⋮</span>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search for items...">
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="filter-container">
+            <button class="filter-btn active" data-category="all">All</button>
+            <button class="filter-btn" data-category="Electronics">Electronics</button>
+            <button class="filter-btn" data-category="Documents">Documents</button>
+            <button class="filter-btn" data-category="Personal">Personal Items</button>
+        </div>
+
+        <!-- Items Grid -->
+        <div class="items-grid" id="itemsGrid">
+            <!-- Items will be dynamically inserted here -->
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state" id="loadingState">
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <p>No items found matching your criteria.</p>
+        </div>
+    </main>
+
+    <!-- Claim Modal -->
+    <div class="modal-overlay" id="claimModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">&times;</button>
+            <h2>Claim This Item</h2>
+            <p id="modalItemName"></p>
+            <form id="claimForm">
+                <input type="hidden" id="claimItemId">
+                <div class="form-group">
+                    <label for="claimDescription">Describe the item to prove ownership:</label>
+                    <textarea id="claimDescription" rows="4" required
+                        placeholder="Provide specific details about the item that only the owner would know..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="claimContact">Your contact information:</label>
+                    <input type="text" id="claimContact" required placeholder="Phone number or email">
+                </div>
+                <button type="submit" class="submit-claim-btn">Submit Claim</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/config.js"></script>
+    <script src="/js/gallery.js"></script>
+    <script src="/js/nav-func.js"></script>
+</body>
+
+</html>
