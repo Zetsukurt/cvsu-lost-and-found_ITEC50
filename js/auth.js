@@ -155,7 +155,22 @@ document.getElementById('resetPassBtn').onclick = async () => {
         message.innerText = "Incorrect answer. Please try again.";
     }
 };
+// toggle recover password
+const recoverNewPasswordInput = document.getElementById('recoveryNewPassword');
+const toggleRecoveryPassword = document.getElementById('toggleRecoveryPassword'); // Ensure this ID is on your "Show" span
 
+if (toggleRecoveryPassword && recoverNewPasswordInput) {
+    toggleRecoveryPassword.addEventListener('click', function () {
+        // Check current type of the RECOVERY input
+        const isPassword = recoverNewPasswordInput.getAttribute('type') === 'password';
+        
+        // Toggle only the recovery input
+        recoverNewPasswordInput.setAttribute('type', isPassword ? 'text' : 'password');
+        
+        // Update the text
+        this.textContent = isPassword ? 'Hide' : 'Show';
+    });
+}
 // --- AUTHENTICATION & SIGNUP LOGIC ---
 authForm.onsubmit = async (e) => {
     e.preventDefault();
@@ -184,13 +199,16 @@ authForm.onsubmit = async (e) => {
 
     } else {
         const fullName = document.getElementById('fullName').value.trim();
+        const contactNumber = document.getElementById('contactNumber').value.trim(); // INCORPORATED: New field
         const question = document.getElementById('securityQuestion').value;
         const answer = document.getElementById('securityAnswer').value.trim().toLowerCase();
         const privacyChecked = document.getElementById('privacyPolicy').checked;
 
-        if (!fullName || !question || !answer) {
+        // INCORPORATED: Added contactNumber to the validation check
+        if (!fullName || !contactNumber || !question || !answer) {
             return message.innerText = "Please fill in all fields.";
         }
+        
         if (!privacyChecked) {
             return message.innerText = "You must agree to the Data Privacy Act.";
         }
@@ -213,6 +231,7 @@ authForm.onsubmit = async (e) => {
                 data: {
                     full_name: fullName,
                     student_id: studentId,
+                    contact_number: contactNumber, // INCORPORATED: Added to metadata
                     security_question: question,
                     security_answer: answer
                 }
