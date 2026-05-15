@@ -1,0 +1,2 @@
+ALTER TABLE claims 
+ADD COLUMN IF NOT EXISTS claimant_contact TEXT;
