@@ -1,3 +1,4 @@
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 async function initNavbar() {
     const nameDisplay = document.getElementById('userNameDisplay');
     const menuToggle = document.getElementById('menuToggle');

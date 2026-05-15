@@ -20,7 +20,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
 }
 
 body.claims-wrapper {
@@ -28,46 +28,29 @@ body.claims-wrapper {
     min-height: 100vh;
 }
 
-/* Navbar (Kept from your reference) */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 20px 60px;
     color: var(--white);
+    background-color: var(--cvsu-green);
 }
 
-.nav-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: bold;
-    font-size: 1.4rem;
-}
+.nav-logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.4rem; }
+.nav-links { display: flex; list-style: none; gap: 30px; }
+.nav-links a { color: var(--white); text-decoration: none; font-size: 0.85rem; font-weight: 600; opacity: 0.8; }
+.nav-links a.active { opacity: 1; border-bottom: 2px solid var(--white); }
+.nav-user { display: flex; align-items: center; gap: 15px; }
+.user-avatar { width: 35px; height: 35px; background: #fff; border-radius: 50%; }
 
-.nav-links {
-    display: flex;
-    list-style: none;
-    gap: 30px;
-}
 
-.nav-links a {
-    color: var(--white);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    opacity: 0.8;
-}
-
-.nav-links a.active {
-    opacity: 1;
-    border-bottom: 2px solid var(--white);
-}
-
-.nav-user {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+/* Existing nav-user update */
+.nav-user { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    position: relative; /* Essential for dropdown positioning */
 }
 
 .user-avatar {
@@ -75,6 +58,45 @@ body.claims-wrapper {
     height: 35px;
     background: #fff;
     border-radius: 50%;
+}
+
+.menu-dots {
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.user-dropdown {
+    display: none;
+    position: absolute;
+    top: 45px;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 8px;
+    z-index: 1000;
+    min-width: 110px;
+}
+
+.user-dropdown.active {
+    display: block;
+}
+
+.logout-action {
+    width: 100%;
+    padding: 8px;
+    background: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.logout-action:hover {
+    background: #b71c1c;
 }
 
 /* Main Claims Content Area */

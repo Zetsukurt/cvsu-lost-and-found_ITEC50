@@ -2,31 +2,29 @@
 let allItems = [];
 let currentCategory = 'all';
 
-// Initialize Supabase
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 // --- Initialization ---
-document.addEventListener('DOMContentLoaded', () => {
-    fetchGalleryItems();
+document.addEventListener('DOMContentLoaded', async () => {
+    await fetchGalleryItems();
     setupEventListeners();
 });
 
-// --- 1. Retrieve All Items ---
+// --- 1. Fetching Data (With Profile Links) ---
 async function fetchGalleryItems() {
     toggleLoading(true);
     
+    // Fetching items and 'joining' with profiles to get the finder's name
     const { data, error } = await _supabase
         .from('items')
         .select(`
             *,
-            profiles (full_name)
+            profiles:reporter_id (full_name, contact_info)
         `)
         .order('created_at', { ascending: false });
 
     toggleLoading(false);
 
     if (error) {
-        console.error("Gallery Fetch Error:", error.message);
+        console.error("Fetch Error:", error.message);
         return;
     }
 
@@ -34,15 +32,15 @@ async function fetchGalleryItems() {
     renderGallery();
 }
 
-// --- 2. Filter & Search Logic ---
+// --- 2. Filtering & Search UI Logic ---
 function renderGallery() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const grid = document.getElementById('itemsGrid');
     const emptyState = document.getElementById('emptyState');
 
-    // Filter by category AND search name simultaneously
     const filtered = allItems.filter(item => {
-        const matchesCategory = currentCategory === 'all' || item.category === currentCategory;
+        // Matches the 'Personal' vs 'Personal Items' mismatch we fixed
+        const matchesCategory = currentCategory === 'all' || item.category.includes(currentCategory);
         const matchesSearch = item.title.toLowerCase().includes(searchTerm);
         return matchesCategory && matchesSearch;
     });
@@ -57,9 +55,8 @@ function renderGallery() {
     grid.innerHTML = filtered.map(item => createItemCard(item)).join('');
 }
 
-// --- 3. Component Creator ---
+// --- 3. Creating the Card Component ---
 function createItemCard(item) {
-    // Logic to check if item is claimable
     const isAvailable = item.status === 'found';
     const statusText = isAvailable ? 'Available' : (item.status.charAt(0).toUpperCase() + item.status.slice(1));
     const statusClass = item.status.toLowerCase();
@@ -89,70 +86,71 @@ function createItemCard(item) {
     `;
 }
 
-// --- Event Listeners ---
-function setupEventListeners() {
-    // Search Input
-    document.getElementById('searchInput').addEventListener('input', renderGallery);
-
-    // Category Buttons
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            // UI Toggle
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            // Logic Toggle
-            currentCategory = btn.getAttribute('data-category');
-            renderGallery();
-        });
-    });
-
-    // Modal Closing
-    document.getElementById('closeModal').onclick = () => document.getElementById('claimModal').classList.remove('active');
-}
-
-// --- Claim Functionality ---
-window.openClaimModal = (id, name) => {
+// --- 4. The Pre-filled Claim Modal ---
+window.openClaimModal = async (id, name) => {
+    const modal = document.getElementById('claimModal');
+    const contactInput = document.getElementById('claimContact');
+    
     document.getElementById('claimItemId').value = id;
     document.getElementById('modalItemName').innerText = `Item: ${name}`;
-    document.getElementById('claimModal').classList.add('active');
-};
 
-document.getElementById('claimForm').onsubmit = async (e) => {
-    e.preventDefault();
-    
-    // 1. Get current user
+    // PRE-FILLING LOGIC: Grabbing student info from their profile
     const { data: { user } } = await _supabase.auth.getUser();
-    
-    if (!user) {
-        alert("You must be logged in to claim an item.");
-        return;
+    if (user) {
+        const { data: profile } = await _supabase
+            .from('profiles')
+            .select('contact_info')
+            .eq('id', user.id)
+            .single();
+
+        if (profile?.contact_info) {
+            contactInput.value = profile.contact_info;
+        }
     }
 
-    // 2. Map data to your specific columns
+    modal.classList.add('active');
+};
+
+// --- 5. Submit Claim to Database ---
+document.getElementById('claimForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const { data: { user } } = await _supabase.auth.getUser();
+    
+    if (!user) return alert("Please log in first.");
+
     const claimData = {
         item_id: document.getElementById('claimItemId').value,
-        claimer_id: user.id,                // Matches your 'claimer_id' column
-        proof_text: document.getElementById('claimDescription').value, // Matches 'proof_text'
-        claim_status: 'pending'            // Matches 'claim_status'
+        claimer_id: user.id,
+        proof_text: document.getElementById('claimDescription').value,
+        claimant_contact: document.getElementById('claimContact').value, // Matches your new column
+        claim_status: 'pending'
     };
 
-    // 3. Insert into your existing 'claims' table
-    const { error } = await _supabase
-        .from('claims')
-        .insert([claimData]);
+    const { error } = await _supabase.from('claims').insert([claimData]);
 
     if (!error) {
-        alert("Claim submitted successfully! The finder will review your proof.");
+        alert("Claim submitted! The finder will review your proof.");
         document.getElementById('claimModal').classList.remove('active');
-        // Optional: clear the form
         e.target.reset();
         fetchGalleryItems(); 
     } else {
-        console.error("Supabase Error:", error.message);
         alert("Error: " + error.message);
     }
 };
+
+// --- Utilities ---
+function setupEventListeners() {
+    document.getElementById('searchInput').addEventListener('input', renderGallery);
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCategory = btn.getAttribute('data-category');
+            renderGallery();
+        };
+    });
+    document.getElementById('closeModal').onclick = () => document.getElementById('claimModal').classList.remove('active');
+}
 
 function toggleLoading(isLoading) {
     document.getElementById('loadingState').style.display = isLoading ? 'block' : 'none';
