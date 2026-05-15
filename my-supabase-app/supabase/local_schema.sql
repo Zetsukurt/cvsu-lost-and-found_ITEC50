@@ -138,6 +138,7 @@ CREATE TABLE IF NOT EXISTS "public"."claims" (
     "proof_text" "text" NOT NULL,
     "claim_status" "text" DEFAULT 'pending'::"text",
     "created_at" timestamp with time zone DEFAULT "now"(),
+    "claimant_contact" "text",
     CONSTRAINT "claims_claim_status_check" CHECK (("claim_status" = ANY (ARRAY['pending'::"text", 'approved'::"text", 'denied'::"text"])))
 );
 
@@ -177,7 +178,8 @@ CREATE TABLE IF NOT EXISTS "public"."profiles" (
     "security_question" "text",
     "security_answer" "text",
     "role" "text" DEFAULT 'user'::"text",
-    "created_at" timestamp with time zone DEFAULT "now"()
+    "created_at" timestamp with time zone DEFAULT "now"(),
+    "contact_info" "text"
 );
 
 
@@ -195,15 +197,6 @@ CREATE OR REPLACE VIEW "public"."public_recovery_questions" AS
 
 
 ALTER VIEW "public"."public_recovery_questions" OWNER TO "postgres";
-
-
-CREATE OR REPLACE VIEW "public"."public_security_questions" AS
- SELECT "student_id",
-    "security_question"
-   FROM "public"."profiles";
-
-
-ALTER VIEW "public"."public_security_questions" OWNER TO "postgres";
 
 
 ALTER TABLE ONLY "public"."claims"
@@ -259,7 +252,19 @@ CREATE POLICY "Admins can update claim status" ON "public"."claims" FOR UPDATE U
 
 
 
+CREATE POLICY "Allow public read access for profiles" ON "public"."profiles" FOR SELECT USING (true);
+
+
+
 CREATE POLICY "Public can view found items" ON "public"."items" FOR SELECT USING (true);
+
+
+
+CREATE POLICY "Public items are viewable by everyone" ON "public"."items" FOR SELECT USING (true);
+
+
+
+CREATE POLICY "Public profiles are viewable by everyone" ON "public"."profiles" FOR SELECT USING (true);
 
 
 
@@ -280,6 +285,10 @@ CREATE POLICY "Users can submit claims" ON "public"."claims" FOR INSERT WITH CHE
 
 
 CREATE POLICY "Users can update own profile" ON "public"."profiles" FOR UPDATE USING ((( SELECT "auth"."uid"() AS "uid") = "id")) WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "id"));
+
+
+
+CREATE POLICY "Users can update their own reports" ON "public"."items" FOR UPDATE USING (("auth"."uid"() = "id"));
 
 
 
@@ -527,12 +536,6 @@ GRANT ALL ON TABLE "public"."profiles" TO "service_role";
 GRANT ALL ON TABLE "public"."public_recovery_questions" TO "anon";
 GRANT ALL ON TABLE "public"."public_recovery_questions" TO "authenticated";
 GRANT ALL ON TABLE "public"."public_recovery_questions" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."public_security_questions" TO "anon";
-GRANT ALL ON TABLE "public"."public_security_questions" TO "authenticated";
-GRANT ALL ON TABLE "public"."public_security_questions" TO "service_role";
 
 
 
