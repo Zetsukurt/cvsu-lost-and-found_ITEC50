@@ -71,8 +71,8 @@ function createItemCard(item) {
                     <h4 class="item-name">${item.title}</h4>
                     <span class="item-category">${item.category}</span>
                 </div>
-                <p class="item-location">Found: ${item.location_found}</p>
-                <p class="item-finder">By: ${item.profiles?.full_name || 'Anonymous User'}</p>
+                <p class="item-location">Found: <strong>${item.location_found}</strong></p>
+                <p class="item-finder">By: <strong>${item.profiles?.full_name || 'Anonymous User'}</strong></p>
                 <div class="item-footer">
                     <span class="item-status ${statusClass}">${statusText}</span>
                     <button class="claim-btn" 

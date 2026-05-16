@@ -48,13 +48,6 @@ body.gallery-wrapper {
     position: relative; 
 }
 
-.user-avatar {
-    width: 35px;
-    height: 35px;
-    background: #fff;
-    border-radius: 50%;
-}
-
 .user-name-text {
     font-size: 0.85rem;
     font-weight: 600;

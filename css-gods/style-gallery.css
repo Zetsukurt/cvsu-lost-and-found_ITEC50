@@ -36,8 +36,6 @@ body.gallery-wrapper {
 .nav-links a { color: var(--white); text-decoration: none; font-size: 0.85rem; font-weight: 600; opacity: 0.8; }
 .nav-links a.active { opacity: 1; border-bottom: 2px solid var(--white); }
 .nav-user { display: flex; align-items: center; gap: 15px; }
-.user-avatar { width: 35px; height: 35px; background: #fff; border-radius: 50%; }
-
 
 /* Existing nav-user update */
 .nav-user { 
@@ -51,17 +49,6 @@ body.gallery-wrapper {
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--white);
-}
-
-.user-avatar-wrapper {
-    position: relative;
-}
-
-.user-avatar {
-    width: 35px;
-    height: 35px;
-    background: var(--white);
-    border-radius: 50%;
 }
 
 .menu-dots {
@@ -246,6 +233,7 @@ body.gallery-wrapper {
     color: var(--text-secondary);
     margin-bottom: 5px;
 }
+
 
 .item-location::before {
     content: "📍";

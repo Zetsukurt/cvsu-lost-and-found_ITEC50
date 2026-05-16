@@ -24,7 +24,7 @@
 }
 
 body.claims-wrapper {
-    background-color: var(--cvsu-green);
+    background-color: var(--bg-beige);
     min-height: 100vh;
 }
 
@@ -54,13 +54,6 @@ body.claims-wrapper {
     align-items: center; 
     gap: 12px; 
     position: relative; 
-}
-
-.user-avatar {
-    width: 35px;
-    height: 35px;
-    background: #fff;
-    border-radius: 50%;
 }
 
 .menu-dots {
@@ -98,7 +91,6 @@ body.claims-wrapper {
 
 /* --- MAIN CONTENT & CONTAINERS --- */
 .main-claims-content {
-    background-color: var(--bg-beige);
     padding: 40px 60px;
     min-height: calc(100vh - 80px);
 }

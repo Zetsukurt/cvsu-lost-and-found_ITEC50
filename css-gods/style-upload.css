@@ -37,8 +37,6 @@ body.upload-wrapper {
 .nav-links a { color: var(--white); text-decoration: none; font-size: 0.85rem; font-weight: 600; opacity: 0.8; }
 .nav-links a.active { opacity: 1; border-bottom: 2px solid var(--white); }
 .nav-user { display: flex; align-items: center; gap: 15px; }
-.user-avatar { width: 35px; height: 35px; background: #fff; border-radius: 50%; }
-
 
 /* Existing nav-user update */
 .nav-user { 
@@ -54,9 +52,6 @@ body.upload-wrapper {
     color: var(--white);
 }
 
-.user-avatar-wrapper {
-    position: relative;
-}
 
 /* Logout Dropdown Styling */
 .user-dropdown {
