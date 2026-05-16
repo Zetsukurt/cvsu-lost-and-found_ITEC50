@@ -1,19 +1,19 @@
 :root {
     --cvsu-green: #3d5a3d;
-    --cvsu-dark-green: #2a3d2a;
+    --cvsu-dark-green: #2b4530; /* Synchronized dark green shadow from reference */
     --bg-beige: #e5e0d4;
-    --card-bg: #d9d6cc;
+    --card-bg: #ede8de; /* Lightened beige to match MyFound dashboard cards */
     --white: #ffffff;
     --text-main: #333;
     --text-muted: #666;
-
-    /* Status Colors */
+    --shadow: 0 8px 17px rgba(0, 0, 0, 0.3);
+    /* Status Colors from Reference Layout */
     --status-rejected-bg: #ffbaba;
     --status-rejected-text: #a70000;
-    --status-pending-bg: #ffeeba;
+    --status-pending-bg: #fce29f;
     --status-pending-text: #856404;
-    --status-approved-bg: #c3e6cb;
-    --status-approved-text: #155724;
+    --status-approved-bg: #9dbb9d;
+    --status-approved-text: #1b301b;
 }
 
 * {
@@ -28,6 +28,7 @@ body.claims-wrapper {
     min-height: 100vh;
 }
 
+/* --- NAVBAR LAYER --- */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -41,16 +42,18 @@ body.claims-wrapper {
 .nav-links { display: flex; list-style: none; gap: 30px; }
 .nav-links a { color: var(--white); text-decoration: none; font-size: 0.85rem; font-weight: 600; opacity: 0.8; }
 .nav-links a.active { opacity: 1; border-bottom: 2px solid var(--white); }
-.nav-user { display: flex; align-items: center; gap: 15px; }
-.user-avatar { width: 35px; height: 35px; background: #fff; border-radius: 50%; }
 
+.user-name-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--white);
+}
 
-/* Existing nav-user update */
 .nav-user { 
     display: flex; 
     align-items: center; 
     gap: 12px; 
-    position: relative; /* Essential for dropdown positioning */
+    position: relative; 
 }
 
 .user-avatar {
@@ -63,6 +66,7 @@ body.claims-wrapper {
 .menu-dots {
     cursor: pointer;
     font-size: 1.2rem;
+    color: var(--white);
 }
 
 .user-dropdown {
@@ -72,15 +76,13 @@ body.claims-wrapper {
     right: 0;
     background: white;
     border-radius: 8px;
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     padding: 8px;
     z-index: 1000;
     min-width: 110px;
 }
 
-.user-dropdown.active {
-    display: block;
-}
+.user-dropdown.active { display: block; }
 
 .logout-action {
     width: 100%;
@@ -92,207 +94,202 @@ body.claims-wrapper {
     font-weight: bold;
     font-size: 0.75rem;
     cursor: pointer;
-    transition: background 0.3s;
 }
 
-.logout-action:hover {
-    background: #b71c1c;
-}
-
-/* Main Claims Content Area */
+/* --- MAIN CONTENT & CONTAINERS --- */
 .main-claims-content {
     background-color: var(--bg-beige);
-    border-radius: 40px 40px 0 0;
     padding: 40px 60px;
     min-height: calc(100vh - 80px);
 }
 
-/* Dashboard Header */
 .dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 40px;
+    gap: 30px;
 }
 
 .dashboard-title h2 {
+    font-family: 'Georgia', serif;    
     font-size: 2rem;
-    color: var(--text-main);
+    color: var(--cvsu-green);
     margin-bottom: 10px;
 }
 
 .dashboard-title p {
     color: var(--text-muted);
-    max-width: 350px;
+    max-width: 450px;
     font-size: 0.95rem;
     line-height: 1.5;
 }
 
-/* Stat Cards */
+/* --- TOP SUMMARY BUBBLES --- */
 .dashboard-stats {
     display: flex;
     gap: 20px;
 }
 
 .stat-card {
-    background: var(--card-bg);
-    padding: 15px 20px;
-    border-radius: 15px;
+    background:#f0ece4;
+    padding: 15px 25px;
+    border-radius: 30px;
     display: flex;
     align-items: center;
     gap: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    min-width: 180px;
+    min-width: 190px;
+    box-shadow: var(--shadow);
 }
 
-.stat-icon {
-    font-size: 2rem;
-}
+.stat-icon { font-size: 1.5rem; }
+.stat-info h5 { font-size: 0.7rem; color: #555; letter-spacing: 0.5px; font-weight: 800; }
+.stat-info h3 { font-size: 2.2rem; color: var(--text-main); line-height: 1; margin: 2px 0; }
+.stat-info p { font-size: 0.65rem; color: #888; }
 
-.stat-info h5 {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    letter-spacing: 0.5px;
-}
-
-.stat-info h3 {
-    font-size: 1.5rem;
-    color: var(--text-main);
-    margin: 5px 0;
-}
-
-.stat-info p {
-    font-size: 0.65rem;
-    color: var(--text-muted);
-}
-
-/* Filters */
+/* --- FILTERS BUTTONS ROW --- */
 .filters-container {
     display: flex;
-    gap: 15px;
-    margin-bottom: 30px;
+    gap: 10px;
+    margin-bottom: 40px;
 }
 
 .filter-btn {
-    padding: 8px 25px;
-    border-radius: 20px;
-    border: 1px solid var(--cvsu-green);
-    background: transparent;
+    padding: 10px 24px;
+    border: 2px solid var(--cvsu-green);
+    background: white;
     color: var(--cvsu-green);
-    font-weight: bold;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.filter-btn.active,
-.filter-btn:hover {
+.filter-btn.active, .filter-btn:hover {
     background: var(--cvsu-green);
     color: var(--white);
 }
 
-/* Dynamic Claims Grid */
+/* --- DYNAMIC CARD GRID ARCHITECTURE --- */
 .claims-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-    gap: 30px;
+    grid-template-columns: 1fr 1fr; /* Clean dual-column layout */
+    gap: 40px;
 }
 
-/* Individual Claim Card */
+/* FIXED: Corrected internal padding and added signature solid shadow */
 .claim-card {
     background-color: var(--card-bg);
-    border-radius: 20px;
-    padding: 25px;
-    /* Simulated offset drop shadow seen in the image */
-    box-shadow: 8px 8px 0px var(--cvsu-dark-green);
+    border-radius: 25px;
+    padding: 35px; /* Keeps everything cleanly grouped away from the edges */
     position: relative;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s;
+}
+
+.claim-card:hover {
+    transform: translateY(-4px);
 }
 
 .claim-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
+    align-items: flex-start;
+    margin-bottom: 10px;
 }
 
 .claim-title {
-    font-size: 1.5rem;
-    color: var(--text-main);
+    font-family: 'Georgia', serif;
+    font-size: 2.4rem !important;
+    color: var(--cvsu-green) !important;
+    margin-bottom: 5px;
 }
 
 .claim-status {
-    padding: 5px 15px;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    font-weight: bold;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
-/* Status variants */
-.status-rejected {
-    background-color: var(--status-rejected-bg);
-    color: var(--status-rejected-text);
-}
-
-.status-pending {
-    background-color: var(--status-pending-bg);
-    color: var(--status-pending-text);
-}
-
-.status-approved {
-    background-color: var(--status-approved-bg);
-    color: var(--status-approved-text);
-}
+/* Status specific mapping hooks */
+.status-rejected { background-color: var(--status-rejected-bg); color: var(--status-rejected-text); }
+.status-pending { background-color: var(--status-pending-bg); color: var(--status-pending-text); }
+.status-approved { background-color: var(--status-approved-bg); color: var(--status-approved-text); }
 
 .claim-location {
-    color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    color: #444;
+    margin-bottom: 4px;
+}
+
+.claim-finder-meta {
+    font-size: 0.85rem;
+    color: #555;
     margin-bottom: 20px;
 }
 
-/* Proof Section */
+/* --- DASHED PROOF BOX --- */
 .claim-proof {
-    border: 1.5px dashed #a8a598;
-    border-radius: 10px;
-    padding: 15px;
-    background-color: rgba(255, 255, 255, 0.3);
-    margin-bottom: 15px;
+    border: 1.5px dashed #888;
+    border-radius: 15px;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.15);
+    margin-bottom: 20px;
 }
 
 .proof-label {
-    font-size: 0.7rem;
-    font-weight: bold;
-    color: var(--text-muted);
+    font-size: 0.65rem;
+    font-weight: 900;
+    color: #555;
     text-transform: uppercase;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     display: block;
 }
 
 .proof-text {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-style: italic;
-    color: var(--text-main);
+    color: #222;
 }
 
-/* Ready for pickup section */
+/* --- GREEN SUCCESS ALERT (APPROVED ITEMS) --- */
 .claim-pickup {
-    background-color: #9ab49a;
-    border-radius: 10px;
-    padding: 15px;
-    color: var(--cvsu-dark-green);
+    background-color: var(--status-approved-bg);
+    border-radius: 12px;
+    padding: 18px 25px;
+    color: var(--status-approved-text);
+    margin-top: auto; /* Pushes alert to the card bottom uniformly */
 }
 
 .pickup-label {
-    font-size: 0.7rem;
-    font-weight: bold;
+    font-size: 0.75rem;
+    font-weight: 900;
     text-transform: uppercase;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
     display: block;
 }
 
 .pickup-text {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
-.pickup-text strong {
-    color: var(--cvsu-dark-green);
+/* --- LAYOUT RESPONSIVENESS MEDIA BREAKS --- */
+@media (max-width: 1200px) {
+    .dashboard-header { flex-direction: column; gap: 25px; }
+    .dashboard-stats { width: 100%; flex-wrap: wrap; }
+    .stat-card { flex: 1; min-width: 170px; }
+}
+
+@media (max-width: 900px) {
+    .claims-grid { grid-template-columns: 1fr; } /* Fallback to clean stacked column list */
+    .main-claims-content { padding: 30px 20px; }
+    .dashboard-header { padding: 0; }
 }

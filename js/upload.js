@@ -1,5 +1,3 @@
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 const uploadForm = document.getElementById('uploadForm');
 const fileInput = document.getElementById('itemPhoto');
 const fileNameDisplay = document.getElementById('fileNameDisplay');

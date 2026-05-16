@@ -6,7 +6,7 @@
     --white: #ffffff;
     --text-main: #333;
     --text-muted: #666;
-    --shadow-solid: #2b4530; /* The dark green shadow from reference */
+    --shadow: 0 8px 17px rgba(0, 0, 0, 0.3);
 
     /* Status Colors from Reference */
     --c-approved: #9dbb9d;
@@ -103,9 +103,9 @@ body.gallery-wrapper {
     gap: 30px;
 }
 
-.header-text h1 {
+.header-text h2 {
     font-family: 'Georgia', serif;
-    font-size: 2.8rem;
+    font-size: 2rem;
     color: var(--cvsu-green);
     margin-bottom: 10px;
 }
@@ -130,7 +130,7 @@ body.gallery-wrapper {
     align-items: center;
     gap: 15px;
     min-width: 190px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    box-shadow: var(--shadow);
 }
 
 .stat-icon {
@@ -213,10 +213,15 @@ body.gallery-wrapper {
     border-radius: 25px;
     padding: 35px;
     position: relative;
-    box-shadow: 12px 12px 0px var(--shadow-solid);
+    box-shadow: var(--shadow);
     border: 1px solid rgba(0,0,0,0.08);
     display: flex;
     flex-direction: column;
+    transition: transform 0.2s;
+}
+
+.item-card:hover {
+    transform: translateY(-4px);
 }
 
 .card-header h2 {
@@ -278,6 +283,88 @@ body.gallery-wrapper {
 .status-tag.returned { background: #888; color: white; }
 .status-tag.found { background: var(--c-approved); color: #1b301b; }
 .status-tag.pending { background: var(--c-pending); color: #856404; }
+
+/* --- MULTIPLE CLAIMS INTERACTION UI --- */
+.claims-management-zone {
+    margin-top: 10px;
+}
+
+.claims-header-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--cvsu-green);
+    margin-bottom: 12px;
+}
+
+.multiple-claims-card {
+    background: rgba(255, 255, 255, 0.4) !important;
+    margin-bottom: 15px !important;
+    border-left: 4px solid var(--cvsu-green) !important;
+}
+
+.multiple-claims-card.approved { border-left-color: #2e7d32 !important; background: #e8f5e9 !important; }
+.multiple-claims-card.rejected { border-left-color: #c62828 !important; opacity: 0.7; }
+
+.claimant-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #222;
+    margin-bottom: 6px;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+    padding-bottom: 4px;
+}
+
+.meta-phone {
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* INTERACTION CONTROLS LAYOUT */
+.action-controls-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.pickup-dropdown-menu {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #aaa;
+    font-size: 0.8rem;
+    outline: none;
+    background: var(--white);
+    color: var(--text-main);
+}
+
+.dashboard-action-btn {
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s;
+}
+
+.dashboard-action-btn.accept { background: #3d5a3d; color: white; }
+.dashboard-action-btn.accept:hover { background: #2e442e; }
+
+.dashboard-action-btn.reject { background: #b71c1c; color: white; }
+.dashboard-action-btn.reject:hover { background: #8e1414; }
+
+.claim-resolution-tag {
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-top: 8px;
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.claim-resolution-tag.approved { background: #c8e6c9; color: #2e7d32; }
+.claim-resolution-tag.rejected { background: #ffcdd2; color: #c62828; }
 
 /* --- RESPONSIVE ADJUSTMENTS --- */
 @media (max-width: 1000px) {

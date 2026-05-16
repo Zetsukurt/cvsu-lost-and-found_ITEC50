@@ -1,4 +1,3 @@
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // FETCH COUNT OF ITEMS IN EACH CATEGORY
 // Function to update a specific category UI

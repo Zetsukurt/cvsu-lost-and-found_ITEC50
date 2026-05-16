@@ -1,7 +1,7 @@
 :root {
     --cvsu-green: #3d5a3d; /* Matching the reference image green */
     --bg-beige: #e5e0d4;
-    --card-bg: #d9d6cc;
+    --card-bg: #ede8de;
     --white: #ffffff;
     --text-main: #333;
 }
@@ -19,6 +19,12 @@ body.home-wrapper {
     justify-content: space-between;
     align-items: center;
     padding: 20px 60px;
+    color: var(--white);
+}
+
+.menu-dots {
+    cursor: pointer;
+    font-size: 1.2rem;
     color: var(--white);
 }
 

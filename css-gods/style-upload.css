@@ -26,6 +26,12 @@ body.upload-wrapper {
     color: var(--white);
 }
 
+.menu-dots {
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--white);
+}
+
 .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.4rem; }
 .nav-links { display: flex; list-style: none; gap: 30px; }
 .nav-links a { color: var(--white); text-decoration: none; font-size: 0.85rem; font-weight: 600; opacity: 0.8; }
