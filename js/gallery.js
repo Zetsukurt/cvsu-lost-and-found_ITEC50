@@ -6,6 +6,7 @@ let currentCategory = 'all';
 document.addEventListener('DOMContentLoaded', async () => {
     await fetchGalleryItems();
     setupEventListeners();
+    checkHomepageRedirect(); // FIXED: Captures incoming home category selection filters
 });
 
 // --- 1. Fetching Data (With Profile Links) ---
@@ -32,6 +33,32 @@ async function fetchGalleryItems() {
     renderGallery();
 }
 
+function checkHomepageRedirect() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('category'); 
+
+    if (!categoryParam) return; 
+
+    // FIXED: Searches for both 'all' and 'All' across all possible data-attributes
+    const targetBtn = document.querySelector(`.filter-btn[data-category="${categoryParam}"]`) ||
+                      document.querySelector(`.filter-btn[data-category="${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)}"]`) ||
+                      document.querySelector(`.filter-btn[data-filter="${categoryParam}"]`) ||
+                      document.querySelector(`.filter-btn[data-filter="${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)}"]`);
+    
+    if (targetBtn) {
+        // Clear active tokens from other buttons
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        
+        // Highlight this button
+        targetBtn.classList.add('active');
+        
+        // Inherit the exact attribute definition used by your gallery click listeners
+        currentCategory = targetBtn.getAttribute('data-category') || targetBtn.getAttribute('data-filter') || 'all';
+        
+        renderGallery();
+    }
+}
+
 // --- 2. Filtering & Search UI Logic ---
 function renderGallery() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -40,7 +67,7 @@ function renderGallery() {
 
     const filtered = allItems.filter(item => {
         // Matches the 'Personal' vs 'Personal Items' mismatch we fixed
-        const matchesCategory = currentCategory === 'all' || item.category.includes(currentCategory);
+        const matchesCategory = currentCategory.toLowerCase() === 'all' || item.category.includes(currentCategory);
         const matchesSearch = item.title.toLowerCase().includes(searchTerm);
         return matchesCategory && matchesSearch;
     });

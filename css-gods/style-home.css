@@ -232,7 +232,7 @@ body.home-wrapper {
     position: relative;
 }
 
-.search-bar-container { background: #dcd7ca; padding: 10px 20px; border-radius: 20px; display: flex; align-items: center; gap: 10px; }
+.search-bar-container { background: #ffffff; padding: 10px 20px; border-radius: 20px; display: flex; align-items: center; gap: 10px; }
 .search-input { background: none; border: none; flex: 1; outline: none; }
 
 .categories-container { background: #4a634a; border-radius: 30px; padding: 20px; color: var(--white); flex: 1; }

@@ -13,7 +13,7 @@
     <nav class="navbar">
         <div class="nav-logo">
             <span class="icon"></span>
-            <span class="logo-text">Lost & Found Web</span>
+            <span class="logo-text">Lost & Found Portal</span>
         </div>
         <ul class="nav-links">
             <li><a href="#" class="active">HOME</a></li>
@@ -64,14 +64,20 @@
 
         <!-- Right Section: Categories Card -->
         <aside class="categories-panel">
-            <div class="search-bar-container">
-                <input type="text" placeholder="Search your item here" class="search-input">
-            </div>
 
             <div class="categories-container">
                 <h3>Categories</h3>
+
+                <div class="category-card" data-category="all">
+                    <div class="card-img all-items" ></div>
+                    <div class="card-info">
+                        <h4>All Items</h4>
+                        <p id="count-all">Loading...</p>
+                    </div>
+                    <button class="view-btn">View</button>
+                </div>
                 
-                <div class="category-card">
+                <div class="category-card" data-category="Personal">
                     <div class="card-img personal"></div>
                     <div class="card-info">
                         <h4>Personal Items</h4>
@@ -80,7 +86,7 @@
                     <button class="view-btn">View</button>
                 </div>
 
-                <div class="category-card">
+                <div class="category-card" data-category="Electronics">
                     <div class="card-img electronics"></div>
                     <div class="card-info">
                         <h4>Electronics</h4>
@@ -89,7 +95,7 @@
                     <button class="view-btn">View</button>
                 </div>
 
-                <div class="category-card">
+                <div class="category-card" data-category="Documents">
                     <div class="card-img documents"></div>
                     <div class="card-info">
                         <h4>Documents</h4>
