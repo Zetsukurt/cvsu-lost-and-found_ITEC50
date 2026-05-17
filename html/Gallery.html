@@ -5,13 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Public Gallery - Lost & Found Web</title>
+    <link rel="stylesheet" href="../fontawesome/css/all.min.css">
     <link rel="stylesheet" href="/css-gods/style-gallery.css">
     <link rel="icon" type="image/png" href="/images/logo.png">
     <script src="../js/supabase.js"></script>
 </head>
 
 <body class="gallery-wrapper">
-    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-logo">
             <span class="icon"></span>
@@ -29,43 +29,37 @@
             <div class="user-avatar-wrapper">
                 <div class="user-avatar"></div>
                 <div id="userDropdown" class="user-dropdown">
-                    <button id="logoutBtn" class="logout-action">Logout</button>
+                    <button id="logoutBtn" class="logout-action"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </div>
             </div>
-            <span id="menuToggle" class="menu-dots">⋮</span>
+            <span id="menuToggle" class="menu-dots"><i class="fa-solid fa-ellipsis-vertical"></i></span>
         </div>
     </nav>
 
     <main class="main-content">
-        <!-- Search Bar -->
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="Search for items...">
+        <div class="search-container" style="position: relative; display: flex; align-items: center;">
+            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 40px; color: #666;"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search for items..." style="padding-left: 45px;">
         </div>
 
-        <!-- Filter Buttons -->
         <div class="filter-container">
-            <button class="filter-btn active" data-category="all">All</button>
-            <button class="filter-btn" data-category="Electronics">Electronics</button>
-            <button class="filter-btn" data-category="Documents">Documents</button>
-            <button class="filter-btn" data-category="Personal">Personal Items</button>
+            <button class="filter-btn active" data-category="all"><i class="fa-solid fa-globe"></i> All</button>
+            <button class="filter-btn" data-category="Electronics"><i class="fa-solid fa-laptop"></i> Electronics</button>
+            <button class="filter-btn" data-category="Documents"><i class="fa-solid fa-file-invoice"></i> Documents</button>
+            <button class="filter-btn" data-category="Personal"><i class="fa-solid fa-wallet"></i> Personal Items</button>
         </div>
 
-        <!-- Items Grid -->
         <div class="items-grid" id="itemsGrid">
-            <!-- Items will be dynamically inserted here -->
-        </div>
+            </div>
 
-        <!-- Loading State -->
         <div class="loading-state" id="loadingState">
         </div>
 
-        <!-- Empty State -->
         <div class="empty-state" id="emptyState" style="display: none;">
             <p>No items found matching your criteria.</p>
         </div>
     </main>
 
-    <!-- Claim Modal -->
     <div class="modal-overlay" id="claimModal">
         <div class="modal-content">
             <button class="modal-close" id="closeModal">&times;</button>
@@ -90,8 +84,6 @@
     <script src="/js/config.js"></script>
     <script src="/js/gallery.js"></script>
     <script src="/js/nav-func.js"></script>
-
-
 </body>
 
 </html>

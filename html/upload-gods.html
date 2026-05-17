@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload - Lost & Found Web</title>
+    <link rel="stylesheet" href="../fontawesome/css/all.min.css">
     <link rel="stylesheet" href="../css-gods/style-upload.css">
     <link rel="icon" type="image/png" href="/images/logo.png">    
     <script src="../js/supabase.js"></script>
@@ -20,26 +21,24 @@
             <li><a href="../html/Gallery.html">PUBLIC GALLERY</a></li>
             <li><a href="../html/MyFound.html">MY FOUND ITEMS</a></li>
             <li><a href="../html/MyClaims.html">MY CLAIMS</a></li>
-            <li><a href="../html/upload-gods.html"class="active">UPLOAD</a></li>
+            <li><a href="../html/upload-gods.html" class="active">UPLOAD</a></li>
         </ul>
-        <!-- Updated nav-user section -->
+        
         <div class="nav-user">
             <span id="userNameDisplay" class="user-name-text"></span>
             <div class="user-avatar-wrapper">
                 <div class="user-avatar"></div>
-                <!-- Hidden Logout Dropdown -->
                 <div id="userDropdown" class="user-dropdown">
-                    <button id="logoutBtn" class="logout-action">Logout</button>
+                    <button id="logoutBtn" class="logout-action"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </div>
             </div>
-            <span id="menuToggle" class="menu-dots" style="cursor: pointer;">⋮</span>
+            <span id="menuToggle" class="menu-dots" style="cursor: pointer;"><i class="fa-solid fa-ellipsis-vertical"></i></span>
         </div>
     </nav>
 
     <main class="upload-container">
-        <!-- Left Side: Reporting Form -->
         <section class="form-panel">
-            <h2>Report a Found Item</h2>
+            <h2><i class="fa-solid fa-file-pen"></i> Report a Found Item</h2>
             <form id="uploadForm">
                 <div class="input-group">
                     <input type="text" id="itemName" placeholder="Item Name" required>
@@ -62,24 +61,22 @@
 
                 <div class="input-group">
                     <label for="location">Where was it found?</label>
-                    <!-- Changed to Text Input -->
                     <input type="text" id="location" placeholder="e.g. CvSU Main Library" required>
                 </div>
 
                 <div class="input-group">
                     <label>Upload Photo</label>
                     <div class="custom-file-upload">
-                        <label for="itemPhoto" class="file-btn">Choose file</label>
+                        <label for="itemPhoto" class="file-btn"><i class="fa-solid fa-image"></i> Choose file</label>
                         <span id="fileNameDisplay">No file chosen</span>
                         <input type="file" id="itemPhoto" accept="image/*" required>
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn" id="submitBtn">Submit Report</button>
+                <button type="submit" class="submit-btn" id="submitBtn"><i class="fa-solid fa-cloud-arrow-up"></i> Submit Report</button>
             </form>
         </section>
 
-        <!-- Right Side: Hero Text -->
         <section class="info-panel">
             <div class="hero-quote">
                 <h1>INTEGRITY IS DOING THE RIGHT THING, EVEN WHEN NO ONE IS WATCHING.</h1>
@@ -88,8 +85,7 @@
             <div class="recent-section">
                 <h3>Recently Found Items</h3>
                 <div class="recent-grid" id="recentGrid">
-                    <!-- JS will inject cards here -->
-                </div>
+                    </div>
             </div>
         </section>
     </main>

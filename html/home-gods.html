@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - Lost & Found Web</title>
+    <link rel="stylesheet" href="../fontawesome/css/all.min.css">
     <link rel="stylesheet" href="../css-gods/style-home.css">
     <link rel="icon" type="image/png" href="/images/logo.png">    
     <script src="../js/supabase.js"></script>
 </head>
 <body class="home-wrapper">
-    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-logo">
             <span class="icon"></span>
@@ -22,54 +22,48 @@
             <li><a href="/html/MyClaims.html">MY CLAIMS</a></li>
             <li><a href="/html/upload-gods.html">UPLOAD</a></li>
         </ul>
-        <!-- Updated nav-user section -->
         <div class="nav-user">
             <span id="userNameDisplay" class="user-name-text"></span>
             <div class="user-avatar-wrapper">
                 <div class="user-avatar"></div>
-                <!-- Hidden Logout Dropdown -->
                 <div id="userDropdown" class="user-dropdown">
-                    <button id="logoutBtn" class="logout-action">Logout</button>
+                    <button id="logoutBtn" class="logout-action"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </div>
             </div>
-            <span id="menuToggle" class="menu-dots" style="cursor: pointer;">⋮</span>
+            <span id="menuToggle" class="menu-dots" style="cursor: pointer;"><i class="fa-solid fa-ellipsis-vertical"></i></span>
         </div>
     </nav>
 
     <main class="main-content">
-        <!-- Left Section: Hero & Carousel -->
         <section class="hero-section">
             <div class="hero-text-content">
                 <h1>FIND WHAT’S YOURS. RETURN WHAT’S NOT</h1>
                 <p>A secure platform for reporting found items and reclaiming lost belongings through an anonymous, community-driven gallery. It’s the simplest way to find what’s yours and safely return what isn’t.</p>
             </div>
 
-
-            <!-- Carousel Component -->
-                <div class="carousel-container">
-                    <div class="carousel-visual">
-                        <div class="visual-item keys left" id="item1"></div>
-                        <div class="visual-item wallet center" id="item2"></div>
-                        <div class="visual-item watch right" id="item3"></div>
-                    </div>
+            <div class="carousel-container">
+                <div class="carousel-visual">
+                    <div class="visual-item keys left" id="item1"></div>
+                    <div class="visual-item wallet center" id="item2"></div>
+                    <div class="visual-item watch right" id="item3"></div>
                 </div>
+            </div>
 
-                <div class="dots-navigation">
-                    <span class="dot" onclick="jumpToSlide(0)"></span>
-                    <span class="dot" onclick="jumpToSlide(1)"></span>
-                    <span class="dot" onclick="jumpToSlide(2)"></span>
-                </div>   
-             
+            <div class="dots-navigation">
+                <span class="dot" onclick="jumpToSlide(0)"></span>
+                <span class="dot" onclick="jumpToSlide(1)"></span>
+                <span class="dot" onclick="jumpToSlide(2)"></span>
+            </div>   
         </section>
 
-        <!-- Right Section: Categories Card -->
         <aside class="categories-panel">
-
             <div class="categories-container">
-                <h3>Categories</h3>
+                <h3><i class="fa-solid fa-layer-group" style="font-size: 1.1rem; margin-right: 5px;"></i> Categories</h3>
 
                 <div class="category-card" data-category="all">
-                    <div class="card-img all-items" ></div>
+                    <div class="card-img all-items" style="display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-globe" style="color: #3d5a3d; font-size: 2.2rem;"></i>
+                    </div>
                     <div class="card-info">
                         <h4>All Items</h4>
                         <p id="count-all">Loading...</p>
@@ -77,17 +71,10 @@
                     <button class="view-btn">View</button>
                 </div>
                 
-                <div class="category-card" data-category="Personal">
-                    <div class="card-img personal"></div>
-                    <div class="card-info">
-                        <h4>Personal Items</h4>
-                        <p id="count-personal">Loading...</p>
-                    </div>
-                    <button class="view-btn">View</button>
-                </div>
-
                 <div class="category-card" data-category="Electronics">
-                    <div class="card-img electronics"></div>
+                    <div class="card-img electronics" style="display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-laptop" style="color: #3d5a3d; font-size: 2.2rem;"></i>
+                    </div>
                     <div class="card-info">
                         <h4>Electronics</h4>
                         <p id="count-electronics">Loading...</p>
@@ -96,10 +83,23 @@
                 </div>
 
                 <div class="category-card" data-category="Documents">
-                    <div class="card-img documents"></div>
+                    <div class="card-img documents" style="display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-file-invoice" style="color: #3d5a3d; font-size: 2.2rem;"></i>
+                    </div>
                     <div class="card-info">
                         <h4>Documents</h4>
                         <p id="count-documents">Loading...</p>
+                    </div>
+                    <button class="view-btn">View</button>
+                </div>
+
+                <div class="category-card" data-category="Personal">
+                    <div class="card-img personal" style="display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-wallet" style="color: #3d5a3d; font-size: 2.2rem;"></i>
+                    </div>
+                    <div class="card-info">
+                        <h4>Personal Items</h4>
+                        <p id="count-personal">Loading...</p>
                     </div>
                     <button class="view-btn">View</button>
                 </div>
@@ -111,6 +111,5 @@
     <script src="../js/config.js"></script>
     <script src="../js/nav-func.js"></script>    
     <script src="../js/home.js"></script>
-
 </body>
 </html>

@@ -59,7 +59,6 @@ function renderClaimsCounters() {
     const approved = myClaims.filter(c => c.claim_status === 'approved').length;
     const rejected = myClaims.filter(c => c.claim_status === 'rejected').length;
 
-    // Direct DOM text binding matching your HTML element IDs
     document.getElementById('stat-total').innerText = total;
     document.getElementById('stat-pending').innerText = pending;
     document.getElementById('stat-approved').innerText = approved;
@@ -71,7 +70,6 @@ function renderClaimsGrid() {
     const container = document.getElementById('dynamic-claims-container');
     if (!container) return;
 
-    // Filter elements based on selection pill state
     const filteredClaims = myClaims.filter(claim => {
         if (currentFilter === 'All') return true;
         return claim.claim_status.toLowerCase() === currentFilter.toLowerCase();
@@ -87,7 +85,6 @@ function renderClaimsGrid() {
         const finderProfile = itemInfo.profiles || {};
         const statusClass = claim.claim_status.toLowerCase();
         
-        // Resolve target string displays safely
         const finderName = finderProfile.full_name || "Anonymous Finder";
         const finderContact = finderProfile.contact_info || "No contact info provided";
         const pickupLocation = itemInfo.pickup_location || "Pending Center Assignment";
@@ -99,9 +96,9 @@ function renderClaimsGrid() {
                     <span class="claim-status status-${statusClass}">${claim.claim_status.toUpperCase()}</span>
                 </div>
                 
-                <p class="claim-location" style="margin-bottom: 8px;">📍 Initially found at: <strong>${itemInfo.location_found || 'N/A'}</strong></p>
+                <p class="claim-location" style="margin-bottom: 8px;"><i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 6px;"></i> Initially found at: <strong>${itemInfo.location_found || 'N/A'}</strong></p>
                 <p class="claim-finder-meta" style="font-size: 0.85rem; color: #555; margin-bottom: 18px;">
-                    🔎 Found By: <b>${finderName}</b> | 📞 Contact: <b>${finderContact}</b>
+                    <i class="fa-solid fa-user" style="color: #3d5a3d; margin-right: 4px;"></i> Found By: <b>${finderName}</b> | <i class="fa-solid fa-phone" style="color: #3d5a3d; margin-right: 4px;"></i> Contact: <b>${finderContact}</b>
                 </p>
 
                 <div class="claim-proof">
@@ -115,18 +112,18 @@ function renderClaimsGrid() {
                         color: ${claim.finder_confirmed && claim.claimant_confirmed ? '#1b5e20' : '#155724'};">
                         
                         ${claim.finder_confirmed && claim.claimant_confirmed ? `
-                            <span class="pickup-label" style="font-weight: bold; display: block; margin-bottom: 5px;">✅ HAND-OFF COMPLETE!</span>
+                            <span class="pickup-label" style="font-weight: bold; display: block; margin-bottom: 5px;"><i class="fa-solid fa-circle-check"></i> HAND-OFF COMPLETE!</span>
                             <p class="pickup-text">This item has been successfully returned and verified by both parties. Thank you for keeping our campus honest!</p>
                         ` : `
-                            <span class="pickup-label" style="font-weight: bold; display: block; margin-bottom: 5px;">🎉 CLAIM APPROVED & READY FOR PICKUP!</span>
+                            <span class="pickup-label" style="font-weight: bold; display: block; margin-bottom: 5px;"><i class="fa-solid fa-box-open"></i> CLAIM APPROVED & READY FOR PICKUP!</span>
                             <p class="pickup-text">Proceed to <strong>${pickupLocation}</strong> with your university student ID card.</p>
                             
                             <div style="margin-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 10px;">
                                 ${!claim.claimant_confirmed ? `
-                                    <button class="dashboard-action-btn accept" style="background: #2b4530; color: white; border: none; padding: 10px 16px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer;" onclick="window.handleClaimantReceipt('${claim.id}')">📦 I Have Received My Item</button>
-                                    <p style="font-size: 0.75rem; color: #555; margin-top: 4px; text-align: center;">⚠️ Note: Complete this step within 1 minute or the reservation expires.</p>
+                                    <button class="dashboard-action-btn accept" style="background: #2b4530; color: white; border: none; padding: 10px 16px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer;" onclick="window.handleClaimantReceipt('${claim.id}')"><i class="fa-solid fa-box-open" style="margin-right: 5px;"></i> I Have Received My Item</button>
+                                    <p style="font-size: 0.75rem; color: #555; margin-top: 4px; text-align: center;"><i class="fa-solid fa-triangle-exclamation"></i> Note: Complete this step within 1 minute or the reservation expires.</p>
                                 ` : `
-                                    <span style="font-style: italic; font-size: 0.85rem; display: block; text-align: center; color: #555;">⏳ Verification saved! Waiting for the finder to confirm handout...</span>
+                                    <span style="font-style: italic; font-size: 0.85rem; display: block; text-align: center; color: #555;"><i class="fa-solid fa-hourglass-half"></i> Verification saved! Waiting for the finder to confirm handout...</span>
                                 `}
                             </div>
                         `}
@@ -150,7 +147,7 @@ function setupClaimsFilters() {
     });
 }
 
-// --- ADD TO THE BOTTOM OF my-claims.js ---
+// --- Database Operations ---
 window.handleClaimantReceipt = async (claimId) => {
     if (!confirm("Confirming means you have physically received your lost item. Proceed?")) return;
 

@@ -234,11 +234,6 @@ body.gallery-wrapper {
     margin-bottom: 5px;
 }
 
-
-.item-location::before {
-    content: "📍";
-}
-
 .item-finder {
     font-size: 0.85rem;
     color: var(--text-secondary);

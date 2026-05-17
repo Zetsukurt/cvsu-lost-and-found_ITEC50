@@ -14,7 +14,7 @@ uploadForm.addEventListener('submit', async (e) => {
     submitBtn.innerText = "Uploading...";
 
     try {
-        // --- NEW: Get the logged-in user's data first ---
+        // --- Get the logged-in user's data first ---
         const { data: { user }, error: userError } = await _supabase.auth.getUser();
         
         if (userError || !user) {
@@ -90,7 +90,6 @@ async function fetchUserRecentItems() {
             )
         `)
         .eq('reporter_id', user.id) 
-        // ----------------
         .order('created_at', { ascending: false })
         .limit(2);
 
@@ -104,24 +103,34 @@ async function fetchUserRecentItems() {
 
     // 3. Render the personal items
     grid.innerHTML = data.length > 0 
-        ? data.map(item => `
-            <div class="item-card">
-                <img src="${item.image_url}" class="card-img" alt="Found Item">
-                <div class="card-info">
-                    <div class="title-row">
-                        <h4>${item.title}</h4>
-                        <span class="cat-tag">${item.category}</span>
-                    </div>
-                    <span class="loc-text">📍 Found: ${item.location_found}</span>
-                    <p class="reporter-name">Reported by: ${item.profiles?.full_name || 'You'}</p>
-                    <div class="card-footer">
-                        <span class="status-tag">${item.status === 'found' ? 'Available' : item.status}</span>
+        ? data.map(item => {
+            const statusClass = item.status.toLowerCase();
+            
+            // Translate status markers into consistent uppercase layouts
+            let displayStatusText = item.status.toUpperCase();
+            if (item.status === 'found') displayStatusText = 'AVAILABLE';
+            if (item.status === 'pending') displayStatusText = 'PENDING';
+            if (item.status === 'claimed') displayStatusText = 'RETURNED';
+
+            return `
+                <div class="item-card">
+                    <img src="${item.image_url}" class="card-img" alt="Found Item">
+                    <div class="card-info">
+                        <div class="title-row">
+                            <h4>${item.title}</h4>
+                            <span class="cat-tag">${item.category}</span>
+                        </div>
+                        <span class="loc-text"><i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 5px;"></i> Found: ${item.location_found}</span>
+                        <p class="reporter-name"><i class="fa-solid fa-user" style="color: #666; margin-right: 5px;"></i> Reported by: ${item.profiles?.full_name || 'You'}</p>
+                        <div class="card-footer">
+                            <span class="status-tag ${statusClass}">${displayStatusText}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `).join('')
-        : `<p class="no-items">No recent reports found. Start helping the community!</p>`;
+            `;
+        }).join('')
+        : `<p class="no-items"><i class="fa-solid fa-inbox" style="margin-right: 5px;"></i> No recent reports found. Start helping the community!</p>`;
 }
 
-// 5. CALL ON LOAD
+// CALL ON LOAD
 document.addEventListener('DOMContentLoaded', fetchUserRecentItems);

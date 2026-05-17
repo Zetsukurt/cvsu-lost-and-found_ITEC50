@@ -44,7 +44,7 @@ function renderGallery() {
         const matchesCategory = currentCategory.toLowerCase() === 'all' || item.category.includes(currentCategory);
         const matchesSearch = item.title.toLowerCase().includes(searchTerm);
         
-        // B. NEW: Automatic Hiding Window Rule for Handed-Over Items
+        // B. Automatic Hiding Window Rule for Handed-Over Items
         if (item.status === 'claimed') {
             if (!item.claimed_at) return false; // Hide completely if legacy row is missing a timestamp
             
@@ -53,7 +53,6 @@ function renderGallery() {
             const minutesElapsed = (currentTime - completionTime) / (1000 * 60);
             
             // If more than 1 minute has passed since dual completion, hide it from the public gallery feed!
-            // (During deployment, change this number to 60 for 1 hour, or 1440 for 24 hours)
             if (minutesElapsed > 1) return false;
         }
 
@@ -74,7 +73,7 @@ function renderGallery() {
 function createItemCard(item) {
     const isAvailable = item.status === 'found';
     
-    // FIXED: Maps database statuses cleanly to match your requested user interface wording
+    // Maps database statuses cleanly to match your requested user interface wording
     let statusText = 'Available';
     if (item.status === 'pending') statusText = 'Pending';
     if (item.status === 'claimed') statusText = 'Returned';
@@ -91,8 +90,8 @@ function createItemCard(item) {
                     <h4 class="item-name">${item.title}</h4>
                     <span class="item-category">${item.category}</span>
                 </div>
-                <p class="item-location">Found: <strong>${item.location_found}</strong></p>
-                <p class="item-finder">By: <strong>${item.profiles?.full_name || 'Anonymous User'}</strong></p>
+                <p class="item-location"><i class="fa-solid fa-location-dot" style="color: var(--cvsu-green); margin-right: 6px;"></i> Found: <strong>${item.location_found}</strong></p>
+                <p class="item-finder"><i class="fa-solid fa-user" style="color: var(--text-secondary); margin-right: 6px;"></i> By: <strong>${item.profiles?.full_name || 'Anonymous User'}</strong></p>
                 <div class="item-footer">
                     <span class="item-status ${statusClass}">${statusText}</span>
                     <button class="claim-btn" 
@@ -113,7 +112,6 @@ function checkHomepageRedirect() {
 
     if (!categoryParam) return; 
 
-    // Searches for both 'all' and 'All' across all possible data-attributes
     const targetBtn = document.querySelector(`.filter-btn[data-category="${categoryParam}"]`) ||
                       document.querySelector(`.filter-btn[data-category="${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)}"]`) ||
                       document.querySelector(`.filter-btn[data-filter="${categoryParam}"]`) ||
@@ -135,7 +133,6 @@ window.openClaimModal = async (id, name) => {
     document.getElementById('claimItemId').value = id;
     document.getElementById('modalItemName').innerText = `Item: ${name}`;
 
-    // PRE-FILLING LOGIC: Grabbing student info from their profile
     const { data: { user } } = await _supabase.auth.getUser();
     if (user) {
         const { data: profile } = await _supabase

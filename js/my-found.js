@@ -11,17 +11,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    setupReviewModalDOM();
     await fetchMyReportedItems(user.id);
     setupDashboardListeners();
 });
 
+// --- Dynamic Modal Structural Injector ---
+function setupReviewModalDOM() {
+    if (!document.getElementById('reviewModalOverlay')) {
+        const modalDiv = document.createElement('div');
+        modalDiv.id = 'reviewModalOverlay';
+        modalDiv.className = 'review-modal-overlay';
+        modalDiv.innerHTML = `
+            <div class="review-modal-content">
+                <button class="review-modal-close" onclick="window.closeReviewModal()">&times;</button>
+                <h2 id="reviewModalItemTitle"></h2>
+                <p id="reviewModalItemSubtitle"></p>
+                <div id="reviewModalClaimsList"></div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+    }
+}
+
 // --- 1. Fetch Items with Detailed Claimant Profiles ---
 async function fetchMyReportedItems(userId) {
     toggleLoading(true);
+    try {
+        await _supabase.rpc('enforce_claim_expiration_windows');
+    } catch (e) {
+        console.warn("Cleanup engine message:", e.message);
+    }
 
-    await _supabase.rpc('enforce_claim_expiration_windows');
-
-    // Deep sub-join query path: Grabs claims and looks up the full name of each claimer
     const { data, error } = await _supabase
         .from('items')
         .select(`
@@ -64,7 +85,7 @@ function updateDashboardCounters() {
     document.getElementById('pendingCount').innerText = pending;
 }
 
-// --- 3. Render Card Grid (Handles Multiple Claims) ---
+// --- 3. Render Clean Compact Card Grid ---
 function renderMyItemsGrid() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const grid = document.getElementById('itemsGrid');
@@ -75,72 +96,66 @@ function renderMyItemsGrid() {
         const matchesSearch = item.title.toLowerCase().includes(searchTerm);
         return matchesCategory && matchesSearch;
     });
+
     if (filtered.length === 0) {
-        grid.innerHTML = `<p class="no-items" style="grid-column: 1/-1; text-align: center; color: #555; padding: 40px 0;">No claim records found in this category.</p>`;
+        grid.innerHTML = `<p class="no-items" style="grid-column: 1/-1; text-align: center; color: #555; padding: 40px 0;">No reported items found in this category.</p>`;
         return;
     }
 
-    emptyState.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'none';
     
     grid.innerHTML = filtered.map(item => {
         const statusClass = item.status.toLowerCase();
-        // NEW: Translate database statuses into clean, uppercase display text strings
+        
         let displayStatusText = item.status.toUpperCase();
         if (item.status === 'found') displayStatusText = 'AVAILABLE';
         if (item.status === 'pending') displayStatusText = 'PENDING';
-        if (item.status === 'claimed') displayStatusText = 'RETURNED'; // Swapped to RETURNED
-        
-    const pendingClaimsOnly = item.claims 
-        ? item.claims.filter(claim => claim.claim_status === 'pending') 
-        : [];
+        if (item.status === 'claimed') displayStatusText = 'RETURNED';
 
-    const totalClaimsCount = pendingClaimsOnly.length;
+        const pendingClaimsOnly = item.claims ? item.claims.filter(claim => claim.claim_status === 'pending') : [];
+        const totalClaimsCount = pendingClaimsOnly.length;
 
-    const prioritizedClaims = pendingClaimsOnly
-        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-        .slice(0, 3);
+        // FIXED: Cleaned up dynamic string zones with local Font Awesome identifiers
+        let dynamicControlZoneHTML = '';
 
-        // Generate the claims review window markup block
-        let claimsHTML = `<div class="claims-management-zone">`;
-        if (prioritizedClaims.length === 0) {
-            claimsHTML += `
-                <div class="proof-box">
-                    <span class="proof-label">User Proof Submitted:</span>
-                    <p class="proof-text">"No proof submitted by a claimant yet."</p>
+        if (item.status === 'found') {
+            if (totalClaimsCount === 0) {
+                dynamicControlZoneHTML = `
+                    <div class="claims-summary-box empty">
+                        <span><i class="fa-solid fa-inbox" style="margin-right: 5px;"></i> No active claim requests submitted yet.</span>
+                    </div>`;
+            } else {
+                dynamicControlZoneHTML = `
+                    <div class="claims-summary-box active">
+                        <span><i class="fa-solid fa-envelope-open-text" style="margin-right: 5px;"></i> <strong>${totalClaimsCount}</strong> student${totalClaimsCount === 1 ? '' : 's'} filed a claim.</span>
+                        <button class="review-queue-trigger-btn" onclick="window.openReviewModal('${item.id}')">Review Claims Queue</button>
+                    </div>`;
+            }
+        } else if (item.status === 'pending' && item.pickup_location) {
+            const activeClaim = item.claims?.find(c => c.claim_status === 'approved');
+            const isBothConfirmed = activeClaim?.finder_confirmed && activeClaim?.claimant_confirmed;
+
+            dynamicControlZoneHTML = `
+                <div class="pickup-alert-zone" style="background-color: ${isBothConfirmed ? '#e8f5e9' : '#fce29f'}; color: ${isBothConfirmed ? '#1b5e20' : '#856404'};">
+                    ${isBothConfirmed ? `
+                        <strong><i class="fa-solid fa-circle-check"></i> ITEM RETURNED SUCCESSFULLY</strong>
+                        <p>The claimant has signed off on receipt. This item case file is closed.</p>
+                    ` : !activeClaim?.finder_confirmed ? `
+                        <strong><i class="fa-solid fa-hourglass-half"></i> PENDING PHYSICAL HAND-OFF</strong>
+                        <p>Assigned Pickup Hub: <b>${item.pickup_location}</b></p>
+                        <button class="handover-confirmation-btn" onclick="window.handleFinderHandover('${activeClaim.id}')"><i class="fa-solid fa-handshake"></i> Confirm Item Handed Over</button>
+                    ` : `
+                        <strong><i class="fa-solid fa-signature"></i> PENDING CLAIMANT SIGNATURE</strong>
+                        <p>Hand-off verified by you. Waiting for the student to confirm reception...</p>
+                    `}
                 </div>`;
-        } else {
-            claimsHTML += `<h4 class="claims-header-title">Incoming Claims (${totalClaimsCount}) - Top 3 Prioritized:</h4>`;
-            prioritizedClaims.forEach((claim, index) => {
-                const claimantName = claim.profiles?.full_name || "Unknown Student";
-                const isClaimPending = claim.claim_status === 'pending';
-
-                claimsHTML += `
-                    <div class="proof-box multiple-claims-card ${claim.claim_status}">
-                        <div class="claimant-meta">
-                            <strong>#${index + 1} Claimant: ${claimantName}</strong>
-                            <span class="meta-phone">📞 Contact: ${claim.claimant_contact || 'N/A'}</span>
-                        </div>
-                        <p class="proof-text">"${claim.proof_text}"</p>
-                        
-                        ${isClaimPending && item.status === 'found' ? `
-                            <div class="action-controls-row">
-                                <select id="pickup-loc-${claim.id}" class="pickup-dropdown-menu">
-                                    <option value="">-- Choose Pickup Hub --</option>
-                                    <option value="DIT Guardhouse">DIT Guardhouse</option>
-                                    <option value="CEIT Lobby">CEIT Lobby</option>
-                                    <option value="CvSU Main Library">CvSU Main Library</option>
-                                </select>
-                                <button class="dashboard-action-btn accept" onclick="window.handleAcceptClaim('${claim.id}', '${item.id}')">Accept</button>
-                                <button class="dashboard-action-btn reject" onclick="window.handleRejectClaim('${claim.id}')">Reject</button>
-                            </div>
-                        ` : `
-                            <div class="claim-resolution-tag ${claim.claim_status}">Status: ${claim.claim_status.toUpperCase()}</div>
-                        `}
-                    </div>
-                `;
-            });
+        } else if (item.status === 'claimed') {
+            dynamicControlZoneHTML = `
+                <div class="pickup-alert-zone complete" style="background-color: #e8f5e9; color: #1b5e20;">
+                    <strong><i class="fa-solid fa-file-circle-check"></i> CLOSED CASE: RETURNED TO OWNER</strong>
+                    <p>Successfully verified and logged. Thank you for keeping our campus honest!</p>
+                </div>`;
         }
-        claimsHTML += `</div>`;
 
         return `
             <div class="item-card">
@@ -148,77 +163,84 @@ function renderMyItemsGrid() {
                     <h2>${item.title}</h2>
                     <span class="status-tag ${statusClass}">${displayStatusText}</span>
                 </div>
+                <p class="loc-info"><i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 5px;"></i> Initially found at: <strong>${item.location_found}</strong></p>
                 
-                <p class="loc-info">📍 Initially found at: <strong>${item.location_found}</strong></p>
-
-                ${claimsHTML}
-
-                ${item.status === 'pending' && item.pickup_location ? `
-                    <div class="pickup-alert" style="padding: 15px; border-radius: 12px; margin-top: 15px;
-                        background-color: ${(() => {
-                            const c = item.claims?.find(cl => cl.claim_status === 'approved');
-                            return (c?.finder_confirmed && c?.claimant_confirmed) ? '#e8f5e9' : '#fce29f';
-                        })()};
-                        color: ${(() => {
-                            const c = item.claims?.find(cl => cl.claim_status === 'approved');
-                            return (c?.finder_confirmed && c?.claimant_confirmed) ? '#1b5e20' : '#856404';
-                        })()};">
-                        
-                        ${(() => {
-                            const activeClaim = item.claims?.find(c => c.claim_status === 'approved');
-                            if (!activeClaim) return '<strong>Processing Verification...</strong>';
-                            
-                            if (activeClaim.finder_confirmed && activeClaim.claimant_confirmed) {
-                                return `
-                                    <strong>✅ ITEM RETURNED SUCCESSFULLY</strong>
-                                    <p>The claimant has signed off on receipt. This item case is closed.</p>
-                                `;
-                            } else if (!activeClaim.finder_confirmed) {
-                                return `
-                                    <strong>PENDING PHYSICAL HAND-OFF</strong>
-                                    <p>Pickup Hub Assignment: <b>${item.pickup_location}</b></p>
-                                    <button class="dashboard-action-btn accept" style="margin-top: 10px; width: 100%;" onclick="window.handleFinderHandover('${activeClaim.id}')">🤝 Confirm Item Handed Over</button>
-                                `;
-                            } else {
-                                return `
-                                    <strong>PENDING CLAIMANT CONFIRMATION</strong>
-                                    <p>Handoff submitted. Waiting for the student to confirm reception on their dashboard...</p>
-                                `;
-                            }
-                        })()}
-                    </div>
-                ` : ''}
+                ${dynamicControlZoneHTML}
             </div>
         `;
     }).join('');
 }
 
-// --- 4. Database Transaction Control Functions ---
+// --- 4. Modal Open & Render Queue Controls ---
+window.openReviewModal = (itemId) => {
+    const item = myItems.find(i => i.id === itemId);
+    if (!item) return;
+
+    document.getElementById('reviewModalItemTitle').innerText = `Review Claims: ${item.title}`;
+    document.getElementById('reviewModalItemSubtitle').innerHTML = `<i class="fa-solid fa-location-dot"></i> Lost Location: ${item.location_found} | Carefully evaluate user proofs below.`;
+
+    const pendingClaims = item.claims ? item.claims.filter(c => c.claim_status === 'pending') : [];
+    const container = document.getElementById('reviewModalClaimsList');
+
+    if (pendingClaims.length === 0) {
+        container.innerHTML = `<p style="text-align: center; color: #666; padding: 30px 0;">No pending claims available for review.</p>`;
+    } else {
+        container.innerHTML = pendingClaims.map((claim, index) => {
+            const studentName = claim.profiles?.full_name || "Unknown Student";
+            return `
+                <div class="modal-claim-row-card">
+                    <div class="modal-claim-meta-row">
+                        <strong>#${index + 1} Applicant: ${studentName}</strong>
+                        <span class="modal-contact-badge"><i class="fa-solid fa-phone"></i> Contact: ${claim.claimant_contact || 'N/A'}</span>
+                    </div>
+                    <div class="modal-proof-quote-box">
+                        "${claim.proof_text}"
+                    </div>
+                    <div class="modal-action-controls-row">
+                        <select id="modal-pickup-loc-${claim.id}" class="modal-dropdown-menu">
+                            <option value="">-- Choose Pickup Center --</option>
+                            <option value="DIT Guardhouse">DIT Guardhouse</option>
+                            <option value="CEIT Lobby">CEIT Lobby</option>
+                            <option value="CvSU Main Library">CvSU Main Library</option>
+                        </select>
+                        <button class="modal-btn approve" onclick="window.handleAcceptClaim('${claim.id}', '${item.id}')">Approve</button>
+                        <button class="modal-btn reject" onclick="window.handleRejectClaim('${claim.id}')">Reject</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    document.getElementById('reviewModalOverlay').classList.add('active');
+};
+
+window.closeReviewModal = () => {
+    const overlay = document.getElementById('reviewModalOverlay');
+    if (overlay) overlay.classList.remove('active');
+};
+
+// --- 5. Database Operations ---
 window.handleAcceptClaim = async (claimId, itemId) => {
-    const locationMenu = document.getElementById(`pickup-loc-${claimId}`);
+    const locationMenu = document.getElementById(`modal-pickup-loc-${claimId}`);
     const selectedLocation = locationMenu ? locationMenu.value : '';
 
     if (!selectedLocation) {
-        alert("Please specify a pickup location before accepting the claim verification process.");
+        alert("Please specify a validation pickup location center before approving.");
         return;
     }
 
-    if (!confirm("Are you sure you want to approve this claim? Other concurrent entries will remain under review or rejected manually.")) return;
+    if (!confirm("Are you sure you want to approve this student's claim? This locks the item reservation.")) return;
 
-    // A. Set claim status to approved
     const { error: claimError } = await _supabase
         .from('claims')
         .update({ 
             claim_status: 'approved',
             approved_at: new Date().toISOString()
-         })
+        })
         .eq('id', claimId);
 
-    if (claimError) return alert("Transaction Error: " + claimError.message);
+    if (claimError) return alert("Database Error: " + claimError.message);
 
-    
-
-    // B. Set item status to pending and register the selected layout pickup hub location
     const { error: itemError } = await _supabase
         .from('items')
         .update({ 
@@ -228,17 +250,17 @@ window.handleAcceptClaim = async (claimId, itemId) => {
         .eq('id', itemId);
 
     if (itemError) {
-        alert("Transaction Error: " + itemError.message);
+        alert("Database Error: " + itemError.message);
     } else {
-        alert("Claim approved successfully! The item is now set to ready for pickup.");
-        // Refresh page view dynamically
+        alert("Claim approved successfully! Grid synchronized.");
+        window.closeReviewModal();
         const { data: { user } } = await _supabase.auth.getUser();
         await fetchMyReportedItems(user.id);
     }
 };
 
 window.handleRejectClaim = async (claimId) => {
-    if (!confirm("Are you sure you want to reject this claim submission?")) return;
+    if (!confirm("Reject this claim request submission?")) return;
 
     const { error } = await _supabase
         .from('claims')
@@ -246,22 +268,47 @@ window.handleRejectClaim = async (claimId) => {
         .eq('id', claimId);
 
     if (error) {
-        alert("Transaction Error: " + error.message);
+        alert("Database Error: " + error.message);
     } else {
-        alert("Claim submission successfully rejected.");
+        alert("Claim submission rejected.");
+        const { data: { user } } = await _supabase.auth.getUser();
+        await fetchMyReportedItems(user.id);
+        
+        const activeItem = myItems.find(item => item.claims?.some(c => c.id === claimId));
+        if (activeItem) {
+            window.openReviewModal(activeItem.id);
+        } else {
+            window.closeReviewModal();
+        }
+    }
+};
+
+window.handleFinderHandover = async (claimId) => {
+    if (!confirm("Confirming indicates you have physically handed this item over. Proceed?")) return;
+
+    const { error } = await _supabase
+        .from('claims')
+        .update({ finder_confirmed: true })
+        .eq('id', claimId);
+
+    if (error) {
+        alert("Database Error: " + error.message);
+    } else {
+        alert("Hand-off confirmed successfully!");
         const { data: { user } } = await _supabase.auth.getUser();
         await fetchMyReportedItems(user.id);
     }
 };
 
 function setupDashboardListeners() {
-    document.getElementById('searchInput').addEventListener('input', renderMyItemsGrid);
+    const searchEl = document.getElementById('searchInput');
+    if (searchEl) searchEl.addEventListener('input', renderMyItemsGrid);
 
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            currentCategory = btn.getAttribute('data-category');
+            currentCategory = btn.getAttribute('data-category') || 'all';
             renderMyItemsGrid();
         });
     });
@@ -271,19 +318,3 @@ function toggleLoading(isLoading) {
     const loader = document.getElementById('loadingState');
     if (loader) loader.style.display = isLoading ? 'block' : 'none';
 }
-
-window.handleFinderHandover = async (claimId) => {
-    if (!confirm("Confirming means you have successfully handed this item over to the student. Proceed?")) return;
-
-    const { error } = await _supabase
-        .from('claims')
-        .update({ finder_confirmed: true })
-        .eq('id', claimId);
-
-    if (error) {
-        alert("Transaction Error: " + error.message);
-    } else {
-        alert("Hand-off confirmed successfully!");
-        location.reload();
-    }
-};

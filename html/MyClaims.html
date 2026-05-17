@@ -5,13 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Claims - Lost & Found Web</title>
+    <link rel="stylesheet" href="../fontawesome/css/all.min.css">
     <link rel="stylesheet" href="/css-gods/style-MyClaims.css">
     <link rel="icon" type="image/png" href="/images/logo.png">    
     <script src="../js/supabase.js"></script>
 </head>
 
 <body class="claims-wrapper">
-    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-logo">
             <span class="icon"></span>
@@ -29,16 +29,14 @@
             <div class="user-avatar-wrapper">
                 <div class="user-avatar"></div>
                 <div id="userDropdown" class="user-dropdown">
-                    <button id="logoutBtn" class="logout-action">Logout</button>
+                    <button id="logoutBtn" class="logout-action"> <i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </div>
             </div>
-            <span id="menuToggle" class="menu-dots" style="cursor: pointer;">⋮</span>
+            <span id="menuToggle" class="menu-dots" style="cursor: pointer;"><i class="fa-solid fa-ellipsis-vertical"></i></span>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="main-claims-content">
-        <!-- Dashboard Header -->
         <div class="dashboard-header">
             <div class="dashboard-title">
                 <h2>My Claims Items</h2>
@@ -47,7 +45,7 @@
 
             <div class="dashboard-stats">
                 <div class="stat-card">
-                    <div class="stat-icon"></div>
+                    <div class="stat-icon" style="color: #3d5a3d;"><i class="fa-solid fa-list-check"></i></div>
                     <div class="stat-info">
                         <h5>TOTAL CLAIMS ITEMS</h5>
                         <h3 id="stat-total">0</h3>
@@ -55,7 +53,7 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon"></div>
+                    <div class="stat-icon" style="color: #856404;"><i class="fa-solid fa-hourglass-half"></i></div>
                     <div class="stat-info">
                         <h5>PENDING</h5>
                         <h3 id="stat-pending">0</h3>
@@ -63,7 +61,7 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon"></div>
+                    <div class="stat-icon" style="color: #155724;"><i class="fa-solid fa-circle-check"></i></div>
                     <div class="stat-info">
                         <h5>APPROVED</h5>
                         <h3 id="stat-approved">0</h3>
@@ -71,7 +69,7 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon"></div>
+                    <div class="stat-icon" style="color: #a70000;"><i class="fa-solid fa-circle-xmark"></i></div>
                     <div class="stat-info">
                         <h5>REJECTED</h5>
                         <h3 id="stat-rejected">0</h3>
@@ -81,7 +79,6 @@
             </div>
         </div>
 
-        <!-- Filters -->
         <div class="filters-container">
             <button class="filter-btn active" data-filter="All">All</button>
             <button class="filter-btn" data-filter="Pending">Pending</button>
@@ -89,10 +86,8 @@
             <button class="filter-btn" data-filter="Rejected">Rejected</button>
         </div>
 
-        <!-- Dynamic Claims Grid -->
         <div id="dynamic-claims-container" class="claims-grid">
-            <!-- JavaScript will populate cards here -->
-        </div>
+            </div>
     </main>
 
     <script src="/js/config.js"></script>

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Found Items - Lost & Found Web</title>
+    <link rel="stylesheet" href="../fontawesome/css/all.min.css">
     <link rel="stylesheet" href="/css-gods/style-MyFound.css">
     <link rel="icon" type="image/png" href="/images/logo.png">    
     <script src="../js/supabase.js"></script>
@@ -29,10 +30,10 @@
             <div class="user-avatar-wrapper">
                 <div class="user-avatar"></div>
                 <div id="userDropdown" class="user-dropdown">
-                    <button id="logoutBtn" class="logout-action">Logout</button>
+                    <button id="logoutBtn" class="logout-action"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </div>
             </div>
-            <span id="menuToggle" class="menu-dots" style="cursor: pointer;">⋮</span>
+            <span id="menuToggle" class="menu-dots" style="cursor: pointer;"><i class="fa-solid fa-ellipsis-vertical"></i></span>
         </div>
     </nav>
 
@@ -45,7 +46,7 @@
             
             <div class="stats-row" id="statsRow">
                 <div class="stat-card">
-                    <div class="stat-icon">✔</div>
+                    <div class="stat-icon" style="color: #2e7d32;"><i class="fa-solid fa-box-open"></i></div>
                     <div class="stat-info">
                         <span class="stat-label">AVAILABLE</span>
                         <h2 id="availableCount">0</h2>
@@ -53,7 +54,7 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">✔</div>
+                    <div class="stat-icon" style="color: #1b5e20;"><i class="fa-solid fa-handshake"></i></div>
                     <div class="stat-info">
                         <span class="stat-label">RETURNED</span>
                         <h2 id="returnedCount">0</h2>
@@ -61,7 +62,7 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">✔</div>
+                    <div class="stat-icon" style="color: #1565c0;"><i class="fa-solid fa-business-time"></i></div>
                     <div class="stat-info">
                         <span class="stat-label">PENDING</span>
                         <h2 id="pendingCount">0</h2>
@@ -79,24 +80,23 @@
                 <button class="filter-btn" data-category="Personal">Personal Items</button>
             </div>
             
-            <div class="search-box">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search for items...">
+            <div class="search-box" style="position: relative; display: flex; align-items: center;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 15px; color: #666;"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search for items..." style="padding-left: 40px;">
             </div>
         </div>
 
         <div class="items-grid" id="itemsGrid">
-            </div>
+        </div>
 
         <div class="loading-state" id="loadingState"></div>
         <div class="empty-state" id="emptyState" style="display: none;">
         </div>
     </main>
 
-
     <script src="../js/config.js"></script>
     <script src="../js/nav-func.js"></script>
     <script src="../js/my-found.js"></script>
-
 </body>
 
 </html>
