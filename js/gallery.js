@@ -6,7 +6,7 @@ let currentCategory = 'all';
 document.addEventListener('DOMContentLoaded', async () => {
     await fetchGalleryItems();
     setupEventListeners();
-    checkHomepageRedirect(); // FIXED: Captures incoming home category selection filters
+    checkHomepageRedirect(); // Captures incoming category navigation selections from home screen
 });
 
 // --- 1. Fetching Data (With Profile Links) ---
@@ -29,46 +29,34 @@ async function fetchGalleryItems() {
         return;
     }
 
-    allItems = data;
+    allItems = data || [];
     renderGallery();
 }
 
-function checkHomepageRedirect() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const categoryParam = urlParams.get('category'); 
-
-    if (!categoryParam) return; 
-
-    // FIXED: Searches for both 'all' and 'All' across all possible data-attributes
-    const targetBtn = document.querySelector(`.filter-btn[data-category="${categoryParam}"]`) ||
-                      document.querySelector(`.filter-btn[data-category="${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)}"]`) ||
-                      document.querySelector(`.filter-btn[data-filter="${categoryParam}"]`) ||
-                      document.querySelector(`.filter-btn[data-filter="${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)}"]`);
-    
-    if (targetBtn) {
-        // Clear active tokens from other buttons
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        
-        // Highlight this button
-        targetBtn.classList.add('active');
-        
-        // Inherit the exact attribute definition used by your gallery click listeners
-        currentCategory = targetBtn.getAttribute('data-category') || targetBtn.getAttribute('data-filter') || 'all';
-        
-        renderGallery();
-    }
-}
-
-// --- 2. Filtering & Search UI Logic ---
+// --- 2. Filtering & Visibility Timer Logic ---
 function renderGallery() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const grid = document.getElementById('itemsGrid');
     const emptyState = document.getElementById('emptyState');
 
     const filtered = allItems.filter(item => {
-        // Matches the 'Personal' vs 'Personal Items' mismatch we fixed
+        // A. Handle Category Navigation Filter Matches
         const matchesCategory = currentCategory.toLowerCase() === 'all' || item.category.includes(currentCategory);
         const matchesSearch = item.title.toLowerCase().includes(searchTerm);
+        
+        // B. NEW: Automatic Hiding Window Rule for Handed-Over Items
+        if (item.status === 'claimed') {
+            if (!item.claimed_at) return false; // Hide completely if legacy row is missing a timestamp
+            
+            const completionTime = new Date(item.claimed_at).getTime();
+            const currentTime = new Date().getTime();
+            const minutesElapsed = (currentTime - completionTime) / (1000 * 60);
+            
+            // If more than 1 minute has passed since dual completion, hide it from the public gallery feed!
+            // (During deployment, change this number to 60 for 1 hour, or 1440 for 24 hours)
+            if (minutesElapsed > 1) return false;
+        }
+
         return matchesCategory && matchesSearch;
     });
 
@@ -85,7 +73,12 @@ function renderGallery() {
 // --- 3. Creating the Card Component ---
 function createItemCard(item) {
     const isAvailable = item.status === 'found';
-    const statusText = isAvailable ? 'Available' : (item.status.charAt(0).toUpperCase() + item.status.slice(1));
+    
+    // FIXED: Maps database statuses cleanly to match your requested user interface wording
+    let statusText = 'Available';
+    if (item.status === 'pending') statusText = 'Pending';
+    if (item.status === 'claimed') statusText = 'Returned';
+    
     const statusClass = item.status.toLowerCase();
 
     return `
@@ -113,7 +106,28 @@ function createItemCard(item) {
     `;
 }
 
-// --- 4. The Pre-filled Claim Modal ---
+// --- 4. Handle Incoming Category Redirects ---
+function checkHomepageRedirect() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('category'); 
+
+    if (!categoryParam) return; 
+
+    // Searches for both 'all' and 'All' across all possible data-attributes
+    const targetBtn = document.querySelector(`.filter-btn[data-category="${categoryParam}"]`) ||
+                      document.querySelector(`.filter-btn[data-category="${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)}"]`) ||
+                      document.querySelector(`.filter-btn[data-filter="${categoryParam}"]`) ||
+                      document.querySelector(`.filter-btn[data-filter="${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)}"]`);
+    
+    if (targetBtn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        targetBtn.classList.add('active');
+        currentCategory = targetBtn.getAttribute('data-category') || targetBtn.getAttribute('data-filter') || 'all';
+        renderGallery();
+    }
+}
+
+// --- 5. The Pre-filled Claim Modal ---
 window.openClaimModal = async (id, name) => {
     const modal = document.getElementById('claimModal');
     const contactInput = document.getElementById('claimContact');
@@ -138,7 +152,7 @@ window.openClaimModal = async (id, name) => {
     modal.classList.add('active');
 };
 
-// --- 5. Submit Claim to Database ---
+// --- 6. Submit Claim to Database ---
 document.getElementById('claimForm').onsubmit = async (e) => {
     e.preventDefault();
     const { data: { user } } = await _supabase.auth.getUser();
@@ -149,7 +163,7 @@ document.getElementById('claimForm').onsubmit = async (e) => {
         item_id: document.getElementById('claimItemId').value,
         claimer_id: user.id,
         proof_text: document.getElementById('claimDescription').value,
-        claimant_contact: document.getElementById('claimContact').value, // Matches your new column
+        claimant_contact: document.getElementById('claimContact').value, 
         claim_status: 'pending'
     };
 
@@ -165,14 +179,14 @@ document.getElementById('claimForm').onsubmit = async (e) => {
     }
 };
 
-// --- Utilities ---
+// --- Utilities & Listeners ---
 function setupEventListeners() {
     document.getElementById('searchInput').addEventListener('input', renderGallery);
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.onclick = () => {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            currentCategory = btn.getAttribute('data-category');
+            currentCategory = btn.getAttribute('data-category') || btn.getAttribute('data-filter') || 'all';
             renderGallery();
         };
     });
@@ -180,5 +194,6 @@ function setupEventListeners() {
 }
 
 function toggleLoading(isLoading) {
-    document.getElementById('loadingState').style.display = isLoading ? 'block' : 'none';
+    const loadingState = document.getElementById('loadingState');
+    if (loadingState) loadingState.style.display = isLoading ? 'block' : 'none';
 }

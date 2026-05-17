@@ -276,6 +276,7 @@ body.gallery-wrapper {
 .status-tag.returned { background: #888; color: white; }
 .status-tag.found { background: var(--c-approved); color: #1b301b; }
 .status-tag.pending { background: var(--c-pending); color: #856404; }
+.status-tag.claimed { background-color: #e8f5e9; color: #1b5e20; padding: 5px 15px; border-radius: 15px; font-size: 0.8rem; font-weight: bold;}
 
 /* --- MULTIPLE CLAIMS INTERACTION UI --- */
 .claims-management-zone {

@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function fetchMyReportedItems(userId) {
     toggleLoading(true);
 
+    await _supabase.rpc('enforce_claim_expiration_windows');
+
     // Deep sub-join query path: Grabs claims and looks up the full name of each claimer
     const { data, error } = await _supabase
         .from('items')
@@ -31,6 +33,8 @@ async function fetchMyReportedItems(userId) {
                 claimant_contact,
                 claim_status,
                 created_at,
+                finder_confirmed,
+                claimant_confirmed,
                 profiles:claimer_id (full_name)
             )
         `)
@@ -80,6 +84,11 @@ function renderMyItemsGrid() {
     
     grid.innerHTML = filtered.map(item => {
         const statusClass = item.status.toLowerCase();
+        // NEW: Translate database statuses into clean, uppercase display text strings
+        let displayStatusText = item.status.toUpperCase();
+        if (item.status === 'found') displayStatusText = 'AVAILABLE';
+        if (item.status === 'pending') displayStatusText = 'PENDING';
+        if (item.status === 'claimed') displayStatusText = 'RETURNED'; // Swapped to RETURNED
         
     const pendingClaimsOnly = item.claims 
         ? item.claims.filter(claim => claim.claim_status === 'pending') 
@@ -137,7 +146,7 @@ function renderMyItemsGrid() {
             <div class="item-card">
                 <div class="card-header">
                     <h2>${item.title}</h2>
-                    <span class="status-tag ${statusClass}">${item.status === 'found' ? 'Available' : item.status}</span>
+                    <span class="status-tag ${statusClass}">${displayStatusText}</span>
                 </div>
                 
                 <p class="loc-info">📍 Initially found at: <strong>${item.location_found}</strong></p>
@@ -145,9 +154,38 @@ function renderMyItemsGrid() {
                 ${claimsHTML}
 
                 ${item.status === 'pending' && item.pickup_location ? `
-                    <div class="pickup-alert">
-                        <strong>READY FOR PICKUP!</strong>
-                        <p>Proceed to <b>${item.pickup_location}</b> with your university identification ID.</p>
+                    <div class="pickup-alert" style="padding: 15px; border-radius: 12px; margin-top: 15px;
+                        background-color: ${(() => {
+                            const c = item.claims?.find(cl => cl.claim_status === 'approved');
+                            return (c?.finder_confirmed && c?.claimant_confirmed) ? '#e8f5e9' : '#fce29f';
+                        })()};
+                        color: ${(() => {
+                            const c = item.claims?.find(cl => cl.claim_status === 'approved');
+                            return (c?.finder_confirmed && c?.claimant_confirmed) ? '#1b5e20' : '#856404';
+                        })()};">
+                        
+                        ${(() => {
+                            const activeClaim = item.claims?.find(c => c.claim_status === 'approved');
+                            if (!activeClaim) return '<strong>Processing Verification...</strong>';
+                            
+                            if (activeClaim.finder_confirmed && activeClaim.claimant_confirmed) {
+                                return `
+                                    <strong>✅ ITEM RETURNED SUCCESSFULLY</strong>
+                                    <p>The claimant has signed off on receipt. This item case is closed.</p>
+                                `;
+                            } else if (!activeClaim.finder_confirmed) {
+                                return `
+                                    <strong>PENDING PHYSICAL HAND-OFF</strong>
+                                    <p>Pickup Hub Assignment: <b>${item.pickup_location}</b></p>
+                                    <button class="dashboard-action-btn accept" style="margin-top: 10px; width: 100%;" onclick="window.handleFinderHandover('${activeClaim.id}')">🤝 Confirm Item Handed Over</button>
+                                `;
+                            } else {
+                                return `
+                                    <strong>PENDING CLAIMANT CONFIRMATION</strong>
+                                    <p>Handoff submitted. Waiting for the student to confirm reception on their dashboard...</p>
+                                `;
+                            }
+                        })()}
                     </div>
                 ` : ''}
             </div>
@@ -170,10 +208,15 @@ window.handleAcceptClaim = async (claimId, itemId) => {
     // A. Set claim status to approved
     const { error: claimError } = await _supabase
         .from('claims')
-        .update({ claim_status: 'approved' })
+        .update({ 
+            claim_status: 'approved',
+            approved_at: new Date().toISOString()
+         })
         .eq('id', claimId);
 
     if (claimError) return alert("Transaction Error: " + claimError.message);
+
+    
 
     // B. Set item status to pending and register the selected layout pickup hub location
     const { error: itemError } = await _supabase
@@ -228,3 +271,19 @@ function toggleLoading(isLoading) {
     const loader = document.getElementById('loadingState');
     if (loader) loader.style.display = isLoading ? 'block' : 'none';
 }
+
+window.handleFinderHandover = async (claimId) => {
+    if (!confirm("Confirming means you have successfully handed this item over to the student. Proceed?")) return;
+
+    const { error } = await _supabase
+        .from('claims')
+        .update({ finder_confirmed: true })
+        .eq('id', claimId);
+
+    if (error) {
+        alert("Transaction Error: " + error.message);
+    } else {
+        alert("Hand-off confirmed successfully!");
+        location.reload();
+    }
+};

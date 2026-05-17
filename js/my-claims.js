@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user }, error: userError } = await _supabase.auth.getUser();
 
     if (userError || !user) {
-        window.location.href = '/html/login.html';
+        window.location.href = '/html/auth-gods.html';
         return;
     }
 
@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // --- 1. Fetch Submitted Claims with Parent Item & Finder Profiles ---
 async function fetchMySubmittedClaims(userId) {
+    // automated structural cleanup rules:
+    await _supabase.rpc('enforce_claim_expiration_windows');
+
     // Nested relationship sub-join: maps claim -> parent item -> item's reporter profile
     const { data, error } = await _supabase
         .from('claims')
@@ -107,9 +110,26 @@ function renderClaimsGrid() {
                 </div>
 
                 ${claim.claim_status === 'approved' ? `
-                    <div class="claim-pickup">
-                        <span class="pickup-label">Ready For Pickup!</span>
-                        <p class="pickup-text">Proceed to <strong>${pickupLocation}</strong> with your university student ID card to collect your item.</p>
+                    <div class="claim-pickup" style="margin-top: 15px; padding: 20px; border-radius: 15px; 
+                        background-color: ${claim.finder_confirmed && claim.claimant_confirmed ? '#e8f5e9' : '#c3e6cb'}; 
+                        color: ${claim.finder_confirmed && claim.claimant_confirmed ? '#1b5e20' : '#155724'};">
+                        
+                        ${claim.finder_confirmed && claim.claimant_confirmed ? `
+                            <span class="pickup-label" style="font-weight: bold; display: block; margin-bottom: 5px;">✅ HAND-OFF COMPLETE!</span>
+                            <p class="pickup-text">This item has been successfully returned and verified by both parties. Thank you for keeping our campus honest!</p>
+                        ` : `
+                            <span class="pickup-label" style="font-weight: bold; display: block; margin-bottom: 5px;">🎉 CLAIM APPROVED & READY FOR PICKUP!</span>
+                            <p class="pickup-text">Proceed to <strong>${pickupLocation}</strong> with your university student ID card.</p>
+                            
+                            <div style="margin-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 10px;">
+                                ${!claim.claimant_confirmed ? `
+                                    <button class="dashboard-action-btn accept" style="background: #2b4530; color: white; border: none; padding: 10px 16px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer;" onclick="window.handleClaimantReceipt('${claim.id}')">📦 I Have Received My Item</button>
+                                    <p style="font-size: 0.75rem; color: #555; margin-top: 4px; text-align: center;">⚠️ Note: Complete this step within 1 minute or the reservation expires.</p>
+                                ` : `
+                                    <span style="font-style: italic; font-size: 0.85rem; display: block; text-align: center; color: #555;">⏳ Verification saved! Waiting for the finder to confirm handout...</span>
+                                `}
+                            </div>
+                        `}
                     </div>
                 ` : ''}
             </div>
@@ -129,3 +149,20 @@ function setupClaimsFilters() {
         });
     });
 }
+
+// --- ADD TO THE BOTTOM OF my-claims.js ---
+window.handleClaimantReceipt = async (claimId) => {
+    if (!confirm("Confirming means you have physically received your lost item. Proceed?")) return;
+
+    const { error } = await _supabase
+        .from('claims')
+        .update({ claimant_confirmed: true })
+        .eq('id', claimId);
+
+    if (error) {
+        alert("Transaction Error: " + error.message);
+    } else {
+        alert("Reception confirmed! Thank you for using the portal.");
+        location.reload();
+    }
+};
