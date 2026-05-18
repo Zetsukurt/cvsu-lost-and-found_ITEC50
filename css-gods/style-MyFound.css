@@ -87,12 +87,17 @@ body.gallery-wrapper {
     cursor: pointer;
 }
 
+.main-content {
+    padding: 40px 60px;
+    min-height: calc(100vh - 80px);
+}
+
 /* --- DASHBOARD HEADER & STATS --- */
 .dashboard-section {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 40px 60px 20px;
+    margin-bottom: 40px;
     gap: 30px;
 }
 
@@ -148,7 +153,6 @@ body.gallery-wrapper {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 60px;
     margin-bottom: 40px;
 }
 
@@ -198,7 +202,6 @@ body.gallery-wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 40px;
-    padding: 0 60px 60px;
 }
 
 .item-card {

@@ -4,6 +4,10 @@
     --card-bg: #d9d6cc;
     --white: #ffffff;
     --input-bg: #ede8de;
+
+    --c-approved: #9dbb9d;
+    --c-pending: #fce29f;
+    --c-returned: #8a9a8a;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -223,7 +227,8 @@ textarea { height: 100px; resize: none; }
 
 /* Category & Status Tags */
 .cat-tag {
-    background: #5a6b5a;
+    background: #3d5a3d;
+    margin-bottom: 10px;
     color: white;
     font-size: 0.6rem;
     padding: 3px 10px;
@@ -232,19 +237,19 @@ textarea { height: 100px; resize: none; }
 }
 
 .loc-text {
-    font-size: 0.7rem;
+    font-size: 0.85rem;
     color: #444;
     display: flex;
     align-items: center;
     gap: 3px;
+    margin-bottom: 5px;
 }
 
 .reporter-name {
-    font-family: 'Georgia', serif;
+    font-size: 0.85rem;
     font-style: italic;
-    font-size: 0.9rem;
     color: #555;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
 }
 
 /* Footer alignment */
@@ -256,7 +261,6 @@ textarea { height: 100px; resize: none; }
 }
 
 .status-tag {
-    text-transform: uppercase;
     font-size: 0.7rem;
     padding: 5px 12px;
     border-radius: 12px;
@@ -265,22 +269,11 @@ textarea { height: 100px; resize: none; }
 }
 
 /* Active found state layout color mappings */
-.status-tag.found {
-    background-color: #c2ccb1 !important;
-    color: #3d5a3d !important;
-}
+.status-tag.returned { background: #888; color: white; }
+.status-tag.found { background: var(--c-approved); color: #1b301b; }
+.status-tag.pending { background: var(--c-pending); color: #856404; }
+.status-tag.claimed { background-color: #e8f5e9; color: #1b5e20; padding: 5px 15px; border-radius: 15px; font-size: 0.8rem; font-weight: bold;}
 
-/* Active verification holding state color mappings */
-.status-tag.pending {
-    background-color: #fce29f !important;
-    color: #856404 !important;
-}
-
-/* Fully completed returned status layout color mappings */
-.status-tag.claimed {
-    background-color: #e8f5e9 !important;
-    color: #1b5e20 !important;
-}
 
 /* --- Info Panel --- */
 .info-panel { flex: 1.2; color: var(--white); padding-top: 20px; }
