@@ -233,6 +233,24 @@ authForm.onsubmit = async (e) => {
             return message.innerText = "Error: This Student ID is already registered.";
         }
 
+        // --- ENROLLED STUDENT IDENTITY GATEKEEPER ---
+        message.innerText = "Verifying identity with registrar...";
+        const { data: enrollmentData, error: enrollError } = await _supabase
+            .from('enrolled_students')
+            .select('student_id, full_name') 
+            .eq('student_id', studentId)
+            .single();
+
+        if (enrollError || !enrollmentData) {
+            return message.innerText = "Error: This Student ID is not recognized as an enrolled CvSU student.";
+        }
+
+        //  matches user text field entry to white-list row match data
+        if (enrollmentData.full_name.toLowerCase() !== fullName.toLowerCase()) {
+            return message.innerText = "Error: The full name provided does not match our official registrar records for this Student ID.";
+        }
+
+        message.innerText = "Creating account...";
         const { error } = await _supabase.auth.signUp({
             email: maskedEmail,
             password: password,

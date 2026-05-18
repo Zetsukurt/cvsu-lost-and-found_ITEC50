@@ -7,11 +7,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user }, error: userError } = await _supabase.auth.getUser();
 
     if (userError || !user) {
-        window.location.href = '/html/auth-gods.html';
+        window.location.href = '/html/login.html';
         return;
     }
 
+    // Initialize the custom dynamic modal container markup
     setupReviewModalDOM();
+    
     await fetchMyReportedItems(user.id);
     setupDashboardListeners();
 });
@@ -37,7 +39,9 @@ function setupReviewModalDOM() {
 // --- 1. Fetch Items with Detailed Claimant Profiles ---
 async function fetchMyReportedItems(userId) {
     toggleLoading(true);
+
     try {
+        // Automatically run the 1-minute expiration cleanup routine on page reload
         await _supabase.rpc('enforce_claim_expiration_windows');
     } catch (e) {
         console.warn("Cleanup engine message:", e.message);
@@ -107,15 +111,32 @@ function renderMyItemsGrid() {
     grid.innerHTML = filtered.map(item => {
         const statusClass = item.status.toLowerCase();
         
+        // Translate database statuses into clean uppercase display tags
         let displayStatusText = item.status.toUpperCase();
         if (item.status === 'found') displayStatusText = 'AVAILABLE';
         if (item.status === 'pending') displayStatusText = 'PENDING';
         if (item.status === 'claimed') displayStatusText = 'RETURNED';
 
-        const pendingClaimsOnly = item.claims ? item.claims.filter(claim => claim.claim_status === 'pending') : [];
+        const pendingClaimsOnly = item.claims 
+            ? item.claims.filter(claim => claim.claim_status === 'pending') 
+            : [];
         const totalClaimsCount = pendingClaimsOnly.length;
 
-        // FIXED: Cleaned up dynamic string zones with local Font Awesome identifiers
+        // FIXED: Dynamically search for and locate the single approved claim user link record
+        const approvedClaim = item.claims?.find(c => c.claim_status === 'approved' || item.status === 'claimed');
+        let claimantMetaHTML = '';
+        
+        if (approvedClaim) {
+            const claimantName = approvedClaim.profiles?.full_name || "Unknown Student";
+            const claimantContact = approvedClaim.claimant_contact || "N/A";
+            claimantMetaHTML = `
+                <p class="claim-finder-meta" style="font-size: 0.85rem; color: #555; margin-top: -4px; margin-bottom: 14px;">
+                    <i class="fa-solid fa-user" style="color: #3d5a3d; margin-right: 4px;"></i> Claimed By: <b>${claimantName}</b> | <i class="fa-solid fa-phone" style="color: #3d5a3d; margin-right: 4px;"></i> Contact: <b>${claimantContact}</b>
+                </p>
+            `;
+        }
+
+        // Base structural content changes based on current state lifecycle
         let dynamicControlZoneHTML = '';
 
         if (item.status === 'found') {
@@ -127,23 +148,22 @@ function renderMyItemsGrid() {
             } else {
                 dynamicControlZoneHTML = `
                     <div class="claims-summary-box active">
-                        <span><i class="fa-solid fa-envelope-open-text" style="margin-right: 5px;"></i> <strong>${totalClaimsCount}</strong> student${totalClaimsCount === 1 ? '' : 's'} filed a claim.</span>
+                        <span><i class="fa-solid fa-envelope-open-text" style="margin-right: 5px;"></i> <strong>${totalClaimsCount}</strong> student${totalClaimsCount === 1 ? '' : 's'} filed a claim for this item.</span>
                         <button class="review-queue-trigger-btn" onclick="window.openReviewModal('${item.id}')">Review Claims Queue</button>
                     </div>`;
             }
         } else if (item.status === 'pending' && item.pickup_location) {
-            const activeClaim = item.claims?.find(c => c.claim_status === 'approved');
-            const isBothConfirmed = activeClaim?.finder_confirmed && activeClaim?.claimant_confirmed;
+            const isBothConfirmed = approvedClaim?.finder_confirmed && approvedClaim?.claimant_confirmed;
 
             dynamicControlZoneHTML = `
                 <div class="pickup-alert-zone" style="background-color: ${isBothConfirmed ? '#e8f5e9' : '#fce29f'}; color: ${isBothConfirmed ? '#1b5e20' : '#856404'};">
                     ${isBothConfirmed ? `
                         <strong><i class="fa-solid fa-circle-check"></i> ITEM RETURNED SUCCESSFULLY</strong>
                         <p>The claimant has signed off on receipt. This item case file is closed.</p>
-                    ` : !activeClaim?.finder_confirmed ? `
+                    ` : !approvedClaim?.finder_confirmed ? `
                         <strong><i class="fa-solid fa-hourglass-half"></i> PENDING PHYSICAL HAND-OFF</strong>
                         <p>Assigned Pickup Hub: <b>${item.pickup_location}</b></p>
-                        <button class="handover-confirmation-btn" onclick="window.handleFinderHandover('${activeClaim.id}')"><i class="fa-solid fa-handshake"></i> Confirm Item Handed Over</button>
+                        <button class="handover-confirmation-btn" onclick="window.handleFinderHandover('${approvedClaim.id}')">🤝 Confirm Item Handed Over</button>
                     ` : `
                         <strong><i class="fa-solid fa-signature"></i> PENDING CLAIMANT SIGNATURE</strong>
                         <p>Hand-off verified by you. Waiting for the student to confirm reception...</p>
@@ -163,7 +183,9 @@ function renderMyItemsGrid() {
                     <h2>${item.title}</h2>
                     <span class="status-tag ${statusClass}">${displayStatusText}</span>
                 </div>
-                <p class="loc-info"><i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 5px;"></i> Initially found at: <strong>${item.location_found}</strong></p>
+                <p class="loc-info" style="margin-bottom: 8px;"><i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 5px;"></i> Initially found at: <strong>${item.location_found}</strong></p>
+                
+                ${claimantMetaHTML}
                 
                 ${dynamicControlZoneHTML}
             </div>
@@ -271,9 +293,11 @@ window.handleRejectClaim = async (claimId) => {
         alert("Database Error: " + error.message);
     } else {
         alert("Claim submission rejected.");
+        // Re-render modal list entries dynamically by reading fresh global state reference array
         const { data: { user } } = await _supabase.auth.getUser();
         await fetchMyReportedItems(user.id);
         
+        // Find parent item ID context to refresh open modal view metrics cleanly
         const activeItem = myItems.find(item => item.claims?.some(c => c.id === claimId));
         if (activeItem) {
             window.openReviewModal(activeItem.id);
