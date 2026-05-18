@@ -62,7 +62,7 @@
 
                     <div id="contactField" class="input-group">
                         <label class="label-text">Contact Number</label>
-                        <input type="text" id="contactNumber" placeholder="How can the finder reach you?" class="field-input">
+                        <input type="text" id="contactNumber" required placeholder="Enter your mobile number" class="field-input" inputmode="numeric" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     </div>
 
                     <!-- Shared: Password[cite: 1] -->
@@ -73,7 +73,7 @@
                             <span id="togglePassword" class="password-toggle-icon">Show</span>
                         </div>
 
-                        <!-- NEW: Forgot Password Link (Only visible on Login tab) -->
+                        <!-- Forgot Password Link (Only visible on Login tab) -->
                         <div id="forgotPasswordContainer" style="display: none; text-align: right; margin-top: 8px;">
                             <span id="forgotPasswordLink" class="link-text" style="font-size: 0.8rem; cursor: pointer;">Forgot Password?</span>
                         </div>

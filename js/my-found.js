@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user }, error: userError } = await _supabase.auth.getUser();
 
     if (userError || !user) {
-        window.location.href = '/html/login.html';
+        window.location.href = '/html/auth-gods.html';
         return;
     }
 

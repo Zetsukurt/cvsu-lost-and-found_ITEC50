@@ -74,9 +74,10 @@ function createItemCard(item) {
     const isAvailable = item.status === 'found';
     
     // Maps database statuses cleanly to match your requested user interface wording
-    let statusText = 'Available';
-    if (item.status === 'pending') statusText = 'Pending';
-    if (item.status === 'claimed') statusText = 'Returned';
+    let statusText = item.status.toUpperCase();
+    if (item.status === 'found') statusText = 'AVAILABLE';
+    if (item.status === 'pending') statusText = 'PENDING';
+    if (item.status === 'claimed') statusText = 'RETURNED';
     
     const statusClass = item.status.toLowerCase();
 

@@ -120,8 +120,8 @@ async function fetchUserRecentItems() {
                             <h4>${item.title}</h4>
                             <span class="cat-tag">${item.category}</span>
                         </div>
-                        <span class="loc-text"><i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 5px;"></i> Found: ${item.location_found}</span>
-                        <p class="reporter-name"><i class="fa-solid fa-user" style="color: #666; margin-right: 5px;"></i> Reported by: ${item.profiles?.full_name || 'You'}</p>
+                        <span class="loc-text"><i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 5px;"></i> Found: <strong>${item.location_found}</strong></span>
+                        <p class="reporter-name"><i class="fa-solid fa-user" style="color: #666; margin-right: 5px;"></i> By: <strong>${item.profiles?.full_name || 'You'}</strong></p>
                         <div class="card-footer">
                             <span class="status-tag ${statusClass}">${displayStatusText}</span>
                         </div>

@@ -78,12 +78,18 @@
                 </div>
             </div>
         </div>
+        <div class="action-bar">
+            <div class="filters-container">
+                <button class="filter-btn active" data-filter="All">All</button>
+                <button class="filter-btn" data-filter="Pending">Pending</button>
+                <button class="filter-btn" data-filter="Approved">Approved</button>
+                <button class="filter-btn" data-filter="Rejected">Rejected</button>
+            </div>
 
-        <div class="filters-container">
-            <button class="filter-btn active" data-filter="All">All</button>
-            <button class="filter-btn" data-filter="Pending">Pending</button>
-            <button class="filter-btn" data-filter="Approved">Approved</button>
-            <button class="filter-btn" data-filter="Rejected">Rejected</button>
+            <div class="search-box" style="position: relative; display: flex; align-items: center;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 15px; color: #666;"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search for items..." style="padding-left: 40px;">
+            </div>
         </div>
 
         <div id="dynamic-claims-container" class="claims-grid">

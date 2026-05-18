@@ -240,7 +240,7 @@ authForm.onsubmit = async (e) => {
                 data: {
                     full_name: fullName,
                     student_id: studentId,
-                    contact_id: contactNumber,
+                    contact_info: contactNumber,
                     security_question: question,
                     security_answer: answer
                 }

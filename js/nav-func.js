@@ -26,7 +26,7 @@ async function initNavbar() {
     } else {
         // Clear cache and kick to login if session is dead
         sessionStorage.removeItem('user_full_name');
-        window.location.href = 'login.html';
+        window.location.href = '/html/auth-gods.html';
     }
 
     // --- UI Listeners ---

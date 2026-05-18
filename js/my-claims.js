@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 2. Fetch data and bind interactive toggles
     await fetchMySubmittedClaims(user.id);
-    setupClaimsFilters();
+    setupClaimsListeners(); // Updated function name to reflect filter + search
 });
 
 // --- 1. Fetch Submitted Claims with Parent Item & Finder Profiles ---
@@ -65,18 +65,28 @@ function renderClaimsCounters() {
     document.getElementById('stat-rejected').innerText = rejected;
 }
 
-// --- 3. Filter Grid Loop ---
+// --- 3. Filter & Search Grid Loop ---
 function renderClaimsGrid() {
     const container = document.getElementById('dynamic-claims-container');
     if (!container) return;
 
+    // FIXED: Capture what the user is typing in the search bar
+    const searchInput = document.getElementById('searchInput');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+
+    // FIXED: Filter by both tab status AND search query match simultaneously
     const filteredClaims = myClaims.filter(claim => {
-        if (currentFilter === 'All') return true;
-        return claim.claim_status.toLowerCase() === currentFilter.toLowerCase();
+        const itemInfo = claim.items || {};
+        const itemTitle = itemInfo.title || '';
+        
+        const matchesFilter = currentFilter === 'All' || claim.claim_status.toLowerCase() === currentFilter.toLowerCase();
+        const matchesSearch = itemTitle.toLowerCase().includes(searchTerm);
+        
+        return matchesFilter && matchesSearch;
     });
 
     if (filteredClaims.length === 0) {
-        container.innerHTML = `<p class="no-items" style="grid-column: 1/-1; text-align: center; color: #555; padding: 40px 0;">No claim records found in this category.</p>`;
+        container.innerHTML = `<p class="no-items" style="grid-column: 1/-1; text-align: center; color: #555; padding: 40px 0;">No matching claim records found.</p>`;
         return;
     }
 
@@ -134,8 +144,15 @@ function renderClaimsGrid() {
     }).join('');
 }
 
-// --- 4. Event Controls binding ---
-function setupClaimsFilters() {
+// --- 4. Event Controls & Listeners Binding ---
+function setupClaimsListeners() {
+    // FIXED: Added event listener to run the grid renderer whenever user types
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', renderClaimsGrid);
+    }
+
+    // Category Filter Buttons
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
