@@ -290,6 +290,18 @@ body.gallery-wrapper {
     cursor: not-allowed;
 }
 
+.modal-desc {
+    font-size: 0.9rem; 
+    color: #556458; 
+    margin: 10px 0 18px 0; 
+    font-style: italic; 
+    background-color: #f4f1ea; 
+    padding: 12px 14px; 
+    border-radius: 8px; 
+    border-left: 4px solid #3d5a45; 
+    line-height: 1.4;
+}
+
 /* --- Loading & Empty States --- */
 .loading-state,
 .empty-state {
