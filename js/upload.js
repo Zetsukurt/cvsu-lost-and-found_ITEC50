@@ -70,7 +70,6 @@ uploadForm.addEventListener('submit', async (e) => {
         submitBtn.innerText = "Submit Report";
     }
 });
-
 async function fetchUserRecentItems() {
     // 1. Get the currently logged-in user's information
     const { data: { user }, error: userError } = await _supabase.auth.getUser();
@@ -112,6 +111,11 @@ async function fetchUserRecentItems() {
             if (item.status === 'pending') displayStatusText = 'PENDING';
             if (item.status === 'claimed') displayStatusText = 'RETURNED';
 
+            // FORMAT THE FOUND DATE FOR VISUAL CONSISTENCY
+            const foundDate = item.created_at 
+                ? new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+                : 'Unknown Date';
+
             return `
                 <div class="item-card">
                     <img src="${item.image_url}" class="card-img" alt="Found Item">
@@ -120,7 +124,10 @@ async function fetchUserRecentItems() {
                             <h4>${item.title}</h4>
                             <span class="cat-tag">${item.category}</span>
                         </div>
-                        <span class="loc-text"><i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 5px;"></i> Found: <strong>${item.location_found}</strong></span>
+                        <span class="loc-text">
+                            <i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 5px;"></i> 
+                            Found: <strong>${item.location_found} • ${foundDate}</strong>
+                        </span>
                         <p class="reporter-name"><i class="fa-solid fa-user" style="color: #666; margin-right: 5px;"></i> By: <strong>${item.profiles?.full_name || 'You'}</strong></p>
                         <div class="card-footer">
                             <span class="status-tag ${statusClass}">${displayStatusText}</span>

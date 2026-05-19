@@ -122,7 +122,7 @@ function renderMyItemsGrid() {
             : [];
         const totalClaimsCount = pendingClaimsOnly.length;
 
-        // FIXED: Dynamically search for and locate the single approved claim user link record
+        // Locating the single approved claim user link record
         const approvedClaim = item.claims?.find(c => c.claim_status === 'approved' || item.status === 'claimed');
         let claimantMetaHTML = '';
         
@@ -135,6 +135,15 @@ function renderMyItemsGrid() {
                 </p>
             `;
         }
+
+        // FORMAT BOTH TIMESTAMPS FROM THE DATABASE ROW
+        const foundDate = item.created_at 
+            ? new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+            : 'Unknown Date';
+            
+        const returnedDate = item.claimed_at 
+            ? new Date(item.claimed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+            : 'Recent Date';
 
         // Base structural content changes based on current state lifecycle
         let dynamicControlZoneHTML = '';
@@ -159,7 +168,7 @@ function renderMyItemsGrid() {
                 <div class="pickup-alert-zone" style="background-color: ${isBothConfirmed ? '#e8f5e9' : '#fce29f'}; color: ${isBothConfirmed ? '#1b5e20' : '#856404'};">
                     ${isBothConfirmed ? `
                         <strong><i class="fa-solid fa-circle-check"></i> ITEM RETURNED SUCCESSFULLY</strong>
-                        <p>The claimant has signed off on receipt. This item case file is closed.</p>
+                        <p>The claimant signed off on receipt on ${returnedDate}. This item case file is closed.</p>
                     ` : !approvedClaim?.finder_confirmed ? `
                         <strong><i class="fa-solid fa-hourglass-half"></i> PENDING PHYSICAL HAND-OFF</strong>
                         <p>Assigned Pickup Hub: <b>${item.pickup_location}</b></p>
@@ -173,24 +182,31 @@ function renderMyItemsGrid() {
             dynamicControlZoneHTML = `
                 <div class="pickup-alert-zone complete" style="background-color: #e8f5e9; color: #1b5e20;">
                     <strong><i class="fa-solid fa-file-circle-check"></i> CLOSED CASE: RETURNED TO OWNER</strong>
-                    <p>Successfully verified and logged. Thank you for keeping our campus honest!</p>
+                    <p>Successfully verified and logged on ${returnedDate}. Thank you for keeping our campus honest!</p>
                 </div>`;
         }
 
-        return `
-            <div class="item-card">
-                <div class="card-header">
-                    <h2>${item.title}</h2>
-                    <span class="status-tag ${statusClass}">${displayStatusText}</span>
+            return `
+                <div class="item-card">
+                    <div class="card-header">
+                        <h2>${item.title}</h2>
+                        <span class="status-tag ${statusClass}">${displayStatusText}</span>
+                    </div>
+                    
+                    <p class="loc-info" style="margin-bottom: 8px;"><i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 5px;"></i> Initially found at: <strong>${item.location_found} • ${foundDate}</strong></p>
+
+                    ${claimantMetaHTML}
+                                        
+                    <p class="item-desc-display" style="font-size: 0.9rem; color: #4a5568; margin: 4px 0 12px 0; font-style: italic; background-color: rgba(0,0,0,0.02); padding: 8px 12px; border-radius: 8px; border-left: 3px solid #3d5a3d;">
+                        "${item.description || 'No description notes provided.'}"
+                    </p>
+                    ${dynamicControlZoneHTML}
+
+                    
                 </div>
-                <p class="loc-info" style="margin-bottom: 8px;"><i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 5px;"></i> Initially found at: <strong>${item.location_found}</strong></p>
-                
-                ${claimantMetaHTML}
-                
-                ${dynamicControlZoneHTML}
-            </div>
-        `;
+            `;
     }).join('');
+    
 }
 
 // --- 4. Modal Open & Render Queue Controls ---

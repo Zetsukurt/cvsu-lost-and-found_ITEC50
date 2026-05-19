@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lost & Found Portal - Admin Panel</title>
+    <style>
+        /* --- DESIGN SYSTEM COLOR VARIABLES --- */
+        :root {
+            --portal-green: #3d5a45;      /* Deep forest/sage green from header */
+            --portal-bg: #ece9df;         /* Warm beige background */
+            --portal-card-frame: #f4f1ea; /* Light cream container background */
+            --portal-row-bg: #e1ded5;     /* Darker cream for list rows */
+            --portal-text-dark: #2f3e33;  /* High contrast dark green/gray text */
+            
+            /* Action Button Accents (Muted to fit the aesthetic) */
+            --action-confirm: #4f7a5d;
+            --action-release: #4a6fa5;
+            --action-override: #cf8c42;
+            --action-delete: #b85454;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--portal-bg);
+            color: var(--portal-text-dark);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- TOP NAVIGATION BAR (Matches your layout perfectly) --- */
+        .navbar {
+            background-color: var(--portal-green);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand h1 {
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            padding-bottom: 4px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            opacity: 1;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        .user-profile {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* --- MAIN WORKSPACE --- */
+        .workspace {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* --- CONTAINER COMPONENT (Matches Categories Panel Frame) --- */
+        .admin-card-frame {
+            background-color: var(--portal-green);
+            border: 12px solid var(--portal-card-frame);
+            border-radius: 28px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .frame-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #ffffff;
+            margin-bottom: 20px;
+            padding-left: 4px;
+        }
+
+        .frame-header h2 {
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* --- LIST ROWS (Matches Category Row Items Layout) --- */
+        .admin-row-item {
+            background-color: var(--portal-row-bg);
+            border-radius: 16px;
+            padding: 16px 24px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .admin-row-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .item-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--portal-text-dark);
+        }
+
+        .item-meta {
+            font-size: 13px;
+            color: #556458;
+            font-weight: 500;
+        }
+
+        .item-meta strong {
+            color: var(--portal-text-dark);
+        }
+
+        /* --- BUTTONS (Matches your flat "View" button style) --- */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .portal-btn {
+            background-color: var(--portal-card-frame);
+            color: var(--portal-text-dark);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Contextual Colored States for Admin Actions */
+        .portal-btn.btn-confirm:hover { background-color: var(--action-confirm); color: #ffffff; }
+        .portal-btn.btn-release:hover { background-color: var(--action-release); color: #ffffff; }
+        .portal-btn.btn-override:hover { background-color: var(--action-override); color: #ffffff; }
+        .portal-btn.btn-delete:hover { background-color: var(--action-delete); color: #ffffff; }
+
+        /* --- SPAM MODERATION LIST SPECIAL STYLING --- */
+        .spam-text-block {
+            font-size: 14px;
+            font-style: italic;
+            color: #556458;
+            margin-top: 4px;
+            background: rgba(255,255,255,0.3);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border-left: 3px solid var(--action-delete);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <h1>Lost & Found Portal</h1>
+        </div>
+        <ul class="navbar-menu">
+            <li class="nav-link active" onclick="switchAdminTab('logistics-tab', this)">Logistics & Claims</li>
+            <li class="nav-link" onclick="switchAdminTab('moderation-tab', this)">Content Moderation</li>
+        </ul>
+        <div class="user-profile">
+            Rolse Samuel Martinez (Admin)
+        </div>
+    </nav>
+
+    <div class="workspace">
+
+        <div id="logistics-tab" class="tab-content active">
+            
+            <div class="admin-card-frame">
+                <div class="frame-header">
+                    <h2>Awaiting Physical Drop-Off (Intake)</h2>
+                </div>
+                
+                <div class="admin-row-item">
+                    <div class="item-details">
+                        <span class="item-title">Black Acer Laptop Charger</span>
+                        <span class="item-meta">Found by: <strong>Gerard Jariel</strong> | Intended Claimant: <strong>Student One</strong></span>
+                    </div>
+                    <button class="portal-btn btn-confirm">Confirm Intake</button>
+                </div>
+
+                <div class="admin-row-item">
+                    <div class="item-details">
+                        <span class="item-title">Stainless Water Flask</span>
+                        <span class="item-meta">Found by: <strong>Juan Delacruz</strong> | Intended Claimant: <strong>Student Two</strong></span>
+                    </div>
+                    <button class="portal-btn btn-confirm">Confirm Intake</button>
+                </div>
+            </div>
+
+            <div class="admin-card-frame">
+                <div class="frame-header">
+                    <h2>Item Releases & System Overrides</h2>
+                </div>
+
+                <div class="admin-row-item">
+                    <div class="item-details">
+                        <span class="item-title">iPhone 13 (Black Case)</span>
+                        <span class="item-meta">Registered Claimant: <strong>Maria Santos</strong> | Status: <strong>Awaiting Release</strong></span>
+                    </div>
+                    <div class="btn-group">
+                        <button class="portal-btn btn-release">Finalize Handoff</button>
+                    </div>
+                </div>
+
+                <div class="admin-row-item">
+                    <div class="item-details">
+                        <span class="item-title">Mechanical Pencil Case</span>
+                        <span class="item-meta">Registered Claimant: <strong>Juan Dela Cruz</strong> | Status: <strong style="color: #b36b00;">Finder Unresponsive</strong></span>
+                    </div>
+                    <div class="btn-group">
+                        <button class="portal-btn btn-release">Finalize Handoff</button>
+                        <button class="portal-btn btn-override">Force Approve Claim</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="moderation-tab" class="tab-content">
+            
+            <div class="admin-card-frame">
+                <div class="frame-header">
+                    <h2>Global Public Feed Sweep</h2>
+                </div>
+
+                <div class="admin-row-item">
+                    <div class="item-details" style="width: 75%;">
+                        <span class="item-title">Item ID: #1042 | Posted by: Anonymous</span>
+                        <div class="spam-text-block">
+                            "Found a legendary diamond sword outside the computer science lab."
+                        </div>
+                    </div>
+                    <button class="portal-btn btn-delete">Delete Post</button>
+                </div>
+
+                <div class="admin-row-item">
+                    <div class="item-details" style="width: 75%;">
+                        <span class="item-title">Item ID: #1043 | Posted by: Juan Delacruz</span>
+                        <div class="spam-text-block" style="border-left-color: var(--action-confirm);">
+                            "Keys found on the second floor of the CEIT building near the stairs."
+                        </div>
+                    </div>
+                    <button class="portal-btn btn-delete">Delete Post</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        function switchAdminTab(tabId, menuLink) {
+            // Hide all layouts
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Demote active navbar state
+            const links = document.querySelectorAll('.nav-link');
+            links.forEach(link => link.classList.remove('active'));
+
+            // Promote targeted assets
+            document.getElementById(tabId).classList.add('active');
+            menuLink.classList.add('active');
+        }
+    </script>
+</body>
+</html>

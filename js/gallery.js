@@ -81,29 +81,40 @@ function createItemCard(item) {
     
     const statusClass = item.status.toLowerCase();
 
-    return `
-        <div class="item-card">
-            <div class="item-image ${!item.image_url ? 'placeholder' : ''}">
-                ${item.image_url ? `<img src="${item.image_url}" alt="${item.title}">` : '<span>No Image Provided</span>'}
-            </div>
-            <div class="item-details">
-                <div class="item-header">
-                    <h4 class="item-name">${item.title}</h4>
-                    <span class="item-category">${item.category}</span>
+    // FORMAT THE FOUND DATE
+    const foundDate = item.created_at 
+        ? new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+        : 'Unknown Date';
+
+// ... inside createItemCard(item) in gallery.js
+        return `
+            <div class="item-card">
+                <div class="item-image ${!item.image_url ? 'placeholder' : ''}">
+                    ${item.image_url ? `<img src="${item.image_url}" alt="${item.title}">` : '<span>No Image Provided</span>'}
                 </div>
-                <p class="item-location"><i class="fa-solid fa-location-dot" style="color: var(--cvsu-green); margin-right: 6px;"></i> Found: <strong>${item.location_found}</strong></p>
-                <p class="item-finder"><i class="fa-solid fa-user" style="color: var(--text-secondary); margin-right: 6px;"></i> By: <strong>${item.profiles?.full_name || 'Anonymous User'}</strong></p>
-                <div class="item-footer">
-                    <span class="item-status ${statusClass}">${statusText}</span>
-                    <button class="claim-btn" 
-                            ${!isAvailable ? 'disabled' : ''} 
-                            onclick="openClaimModal('${item.id}', '${item.title.replace(/'/g, "\\'")}')">
-                        ${isAvailable ? 'Claim' : 'Unavailable'}
-                    </button>
+                <div class="item-details">
+                    <div class="item-header">
+                        <h4 class="item-name">${item.title}</h4>
+                        <span class="item-category">${item.category}</span>
+                    </div>
+                    <p class="item-location"><i class="fa-solid fa-location-dot" style="color: var(--cvsu-green); margin-right: 6px;"></i> Found: <strong>${item.location_found} • ${foundDate}</strong></p>
+                    <p class="item-finder"><i class="fa-solid fa-user" style="color: var(--text-secondary); margin-right: 6px;"></i> By: <strong>${item.profiles?.full_name || 'Anonymous User'}</strong></p>
+                    
+                    <p class="item-desc-snippet" style="font-size: 0.85rem; color: #64748b; margin: 6px 0 12px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.4;">
+                        ${item.description || 'No additional details provided.'}
+                    </p>
+
+                    <div class="item-footer">
+                        <span class="item-status ${statusClass}">${statusText}</span>
+                        <button class="claim-btn" 
+                                ${!isAvailable ? 'disabled' : ''} 
+                                onclick="openClaimModal('${item.id}', '${item.title.replace(/'/g, "\\'")}')">
+                            ${isAvailable ? 'Claim' : 'Unavailable'}
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
 }
 
 // --- 4. Handle Incoming Category Redirects ---
@@ -133,6 +144,16 @@ window.openClaimModal = async (id, name) => {
     
     document.getElementById('claimItemId').value = id;
     document.getElementById('modalItemName').innerText = `Item: ${name}`;
+
+    // LOCATE THE DESCRIPTION FROM THE CURRENT LIVE STATE ARRAY
+    const selectedItem = allItems.find(item => item.id === id);
+    const modalDescElement = document.getElementById('modalItemDescription');
+    
+    if (modalDescElement) {
+        modalDescElement.innerText = selectedItem?.description 
+            ? `"${selectedItem.description}"` 
+            : "No additional description details provided.";
+    }
 
     const { data: { user } } = await _supabase.auth.getUser();
     if (user) {

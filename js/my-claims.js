@@ -70,11 +70,9 @@ function renderClaimsGrid() {
     const container = document.getElementById('dynamic-claims-container');
     if (!container) return;
 
-    // FIXED: Capture what the user is typing in the search bar
     const searchInput = document.getElementById('searchInput');
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
 
-    // FIXED: Filter by both tab status AND search query match simultaneously
     const filteredClaims = myClaims.filter(claim => {
         const itemInfo = claim.items || {};
         const itemTitle = itemInfo.title || '';
@@ -99,6 +97,15 @@ function renderClaimsGrid() {
         const finderContact = finderProfile.contact_info || "No contact info provided";
         const pickupLocation = itemInfo.pickup_location || "Pending Center Assignment";
 
+        // FORMAT TIMESTAMPS FROM CHILD DATA NODE
+        const foundDate = itemInfo.created_at 
+            ? new Date(itemInfo.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+            : 'Unknown Date';
+            
+        const returnedDate = itemInfo.claimed_at 
+            ? new Date(itemInfo.claimed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+            : 'Recent Date';
+
         return `
             <div class="claim-card">
                 <div class="claim-header">
@@ -106,7 +113,7 @@ function renderClaimsGrid() {
                     <span class="claim-status status-${statusClass}">${claim.claim_status.toUpperCase()}</span>
                 </div>
                 
-                <p class="claim-location" style="margin-bottom: 8px;"><i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 6px;"></i> Initially found at: <strong>${itemInfo.location_found || 'N/A'}</strong></p>
+                <p class="claim-location" style="margin-bottom: 8px;"><i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 6px;"></i> Initially found at: <strong>${itemInfo.location_found || 'N/A'} • ${foundDate}</strong></p>
                 <p class="claim-finder-meta" style="font-size: 0.85rem; color: #555; margin-bottom: 18px;">
                     <i class="fa-solid fa-user" style="color: #3d5a3d; margin-right: 4px;"></i> Found By: <b>${finderName}</b> | <i class="fa-solid fa-phone" style="color: #3d5a3d; margin-right: 4px;"></i> Contact: <b>${finderContact}</b>
                 </p>
@@ -123,7 +130,7 @@ function renderClaimsGrid() {
                         
                         ${claim.finder_confirmed && claim.claimant_confirmed ? `
                             <span class="pickup-label" style="font-weight: bold; display: block; margin-bottom: 5px;"><i class="fa-solid fa-circle-check"></i> HAND-OFF COMPLETE!</span>
-                            <p class="pickup-text">This item has been successfully returned and verified by both parties. Thank you for keeping our campus honest!</p>
+                            <p class="pickup-text">This item has been successfully returned and verified by both parties on ${returnedDate}. Thank you for keeping our campus honest!</p>
                         ` : `
                             <span class="pickup-label" style="font-weight: bold; display: block; margin-bottom: 5px;"><i class="fa-solid fa-box-open"></i> CLAIM APPROVED & READY FOR PICKUP!</span>
                             <p class="pickup-text">Proceed to <strong>${pickupLocation}</strong> with your university student ID card.</p>
