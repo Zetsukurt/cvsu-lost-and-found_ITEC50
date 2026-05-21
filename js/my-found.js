@@ -195,8 +195,7 @@ function renderMyItemsGrid() {
                     
                     <p class="loc-info" style="margin-bottom: 8px;"><i class="fa-solid fa-location-dot" style="color: #3d5a3d; margin-right: 5px;"></i> Initially found at: <strong>${item.location_found} • ${foundDate}</strong></p>
 
-                    ${claimantMetaHTML}
-                                        
+                    ${claimantMetaHTML}       
                     <p class="item-desc-display" style="font-size: 0.9rem; color: #4a5568; margin: 4px 0 12px 0; font-style: italic; background-color: rgba(0,0,0,0.02); padding: 8px 12px; border-radius: 8px; border-left: 3px solid #3d5a3d;">
                         "${item.description || 'No description notes provided.'}"
                     </p>

@@ -33,6 +33,8 @@ async function fetchMySubmittedClaims(userId) {
                 location_found,
                 pickup_location,
                 status,
+                created_at,
+                claimed_at,
                 profiles:reporter_id (
                     full_name,
                     contact_info
@@ -138,7 +140,7 @@ function renderClaimsGrid() {
                             <div style="margin-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 10px;">
                                 ${!claim.claimant_confirmed ? `
                                     <button class="dashboard-action-btn accept" style="background: #2b4530; color: white; border: none; padding: 10px 16px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer;" onclick="window.handleClaimantReceipt('${claim.id}')"><i class="fa-solid fa-box-open" style="margin-right: 5px;"></i> I Have Received My Item</button>
-                                    <p style="font-size: 0.75rem; color: #555; margin-top: 4px; text-align: center;"><i class="fa-solid fa-triangle-exclamation"></i> Note: Complete this step within 1 minute or the reservation expires.</p>
+                                    <p style="font-size: 0.75rem; color: #555; margin-top: 4px; text-align: center;"><i class="fa-solid fa-triangle-exclamation"></i> Note: Complete this step within 24 hours or the reservation expires.</p>
                                 ` : `
                                     <span style="font-style: italic; font-size: 0.85rem; display: block; text-align: center; color: #555;"><i class="fa-solid fa-hourglass-half"></i> Verification saved! Waiting for the finder to confirm handout...</span>
                                 `}
