@@ -13,7 +13,7 @@ BEGIN
         FROM public.claims 
         WHERE claim_status = 'approved' 
           AND (finder_confirmed = FALSE OR claimant_confirmed = FALSE)
-          AND approved_at < NOW() - INTERVAL '1 minute'
+          AND approved_at < NOW() - INTERVAL '5 minute'
     );
 
     -- 2. Reset the stalled claim records back to pending review
