@@ -92,6 +92,25 @@ body.upload-wrapper {
     background: #b71c1c;
 }
 
+.admin-action {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 5px;
+    background: #e8f5e9;
+    color: #1b5e20;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.75rem;
+    text-align: center;
+    transition: background 0.3s;
+}
+
+.admin-action:hover {
+    background: #c8e6c9;
+}
+
 .upload-container { 
     display: flex; 
     padding: 20px 60px; 

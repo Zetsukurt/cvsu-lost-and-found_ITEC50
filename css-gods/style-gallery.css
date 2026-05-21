@@ -90,6 +90,25 @@ body.gallery-wrapper {
     background: #b71c1c;
 }
 
+.admin-action {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 5px;
+    background: #e8f5e9;
+    color: #1b5e20;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.75rem;
+    text-align: center;
+    transition: background 0.3s;
+}
+
+.admin-action:hover {
+    background: #c8e6c9;
+}
+
 /* --- Main Content --- */
 .main-content {
     padding: 30px 60px;
@@ -213,6 +232,10 @@ body.gallery-wrapper {
     font-weight: 700;
     color: var(--text-main);
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px; /* Adjust this width depending on how much room your category tag takes */
 }
 
 .item-category {
@@ -226,21 +249,26 @@ body.gallery-wrapper {
 }
 
 .item-location {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    /* display: flex;  <-- Remove this if it's there so the truncation works smoothly */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 0.85rem;
     color: var(--text-secondary);
     margin-bottom: 5px;
+    width: 100%;
 }
 
 .item-finder {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 0.85rem;
     color: var(--text-secondary);
     font-style: italic;
     margin-bottom: 12px;
+    width: 100%;
 }
-
 .item-footer {
     display: flex;
     justify-content: space-between;
