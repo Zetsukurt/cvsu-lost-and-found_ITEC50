@@ -1,10 +1,11 @@
 // --- Global State ---
 let myClaims = [];
 let currentFilter = 'All';
+let isArchiveView = false; // NEW: Tracks if we are looking at the vault
+let currentUser = null;    // NEW: Stores the user so we can refresh easily
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Authenticate user session
     const { data: { user }, error: userError } = await _supabase.auth.getUser();
 
     if (userError || !user) {
@@ -12,36 +13,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // 2. Fetch data and bind interactive toggles
-    await fetchMySubmittedClaims(user.id);
-    setupClaimsListeners(); // Updated function name to reflect filter + search
+    currentUser = user; // Store user globally
+    await fetchMySubmittedClaims(currentUser.id);
+    setupClaimsListeners(); 
 });
 
-// --- 1. Fetch Submitted Claims with Parent Item & Finder Profiles ---
+// --- 1. Fetch Submitted Claims ---
 async function fetchMySubmittedClaims(userId) {
-    // automated structural cleanup rules:
     await _supabase.rpc('enforce_claim_expiration_windows');
 
-    // Nested relationship sub-join: maps claim -> parent item -> item's reporter profile
     const { data, error } = await _supabase
         .from('claims')
         .select(`
             *,
             items:item_id (
-                title,
-                category,
-                location_found,
-                pickup_location,
-                status,
-                created_at,
-                claimed_at,
-                profiles:reporter_id (
-                    full_name,
-                    contact_info
-                )
+                title, category, location_found, pickup_location, status, created_at, claimed_at,
+                profiles:reporter_id (full_name, contact_info)
             )
         `)
         .eq('claimer_id', userId)
+        .eq('is_archived_by_claimer', isArchiveView) // SMART TOGGLE: Flips between false and true
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -86,7 +77,7 @@ function renderClaimsGrid() {
     });
 
     if (filteredClaims.length === 0) {
-        container.innerHTML = `<p class="no-items" style="grid-column: 1/-1; text-align: center; color: #555; padding: 40px 0;">No matching claim records found.</p>`;
+        container.innerHTML = `<p class="no-items" style="grid-column: 1/-1; text-align: center; color: #555; padding: 40px 0;">${isArchiveView ? 'Your archive is currently empty.' : 'No matching claim records found.'}</p>`;
         return;
     }
 
@@ -99,17 +90,11 @@ function renderClaimsGrid() {
         const finderContact = finderProfile.contact_info || "No contact info provided";
         const pickupLocation = itemInfo.pickup_location || "Pending Center Assignment";
 
-        // FORMAT TIMESTAMPS FROM CHILD DATA NODE
-        const foundDate = itemInfo.created_at 
-            ? new Date(itemInfo.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
-            : 'Unknown Date';
-            
-        const returnedDate = itemInfo.claimed_at 
-            ? new Date(itemInfo.claimed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
-            : 'Recent Date';
+        const foundDate = itemInfo.created_at ? new Date(itemInfo.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unknown Date';
+        const returnedDate = itemInfo.claimed_at ? new Date(itemInfo.claimed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent Date';
 
         return `
-            <div class="claim-card">
+            <div class="claim-card" style="${isArchiveView ? 'opacity: 0.85; filter: grayscale(20%);' : ''}">
                 <div class="claim-header">
                     <h2 class="claim-title" style="font-family: 'Georgia', serif; font-size: 2.2rem; color: #3d5a3d;">${itemInfo.title || 'Unknown Item'}</h2>
                     <span class="claim-status status-${statusClass}">${claim.claim_status.toUpperCase()}</span>
@@ -132,7 +117,18 @@ function renderClaimsGrid() {
                         
                         ${claim.finder_confirmed && claim.claimant_confirmed ? `
                             <span class="pickup-label" style="font-weight: bold; display: block; margin-bottom: 5px;"><i class="fa-solid fa-circle-check"></i> HAND-OFF COMPLETE!</span>
-                            <p class="pickup-text">This item has been successfully returned and verified by both parties on ${returnedDate}. Thank you for keeping our campus honest!</p>
+                            <p class="pickup-text">This item has been successfully returned and verified by both parties on ${returnedDate}.</p>
+                            
+                            ${isArchiveView ? `
+                                <button style="background: transparent; border: 1px solid #1b5e20; color: #1b5e20; padding: 10px; border-radius: 8px; width: 100%; margin-top: 15px; cursor: pointer; font-weight: bold;" onclick="window.unarchiveClaim('${claim.id}')">
+                                    <i class="fa-solid fa-trash-can-arrow-up"></i> Restore to Dashboard
+                                </button>
+                            ` : `
+                                <button style="background: transparent; border: 1px solid #1b5e20; color: #1b5e20; padding: 10px; border-radius: 8px; width: 100%; margin-top: 15px; cursor: pointer; font-weight: bold;" onclick="window.archiveClaim('${claim.id}')">
+                                    <i class="fa-solid fa-box-archive"></i> Remove from Dashboard
+                                </button>
+                            `}
+                            
                         ` : `
                             <span class="pickup-label" style="font-weight: bold; display: block; margin-bottom: 5px;"><i class="fa-solid fa-box-open"></i> CLAIM APPROVED & READY FOR PICKUP!</span>
                             <p class="pickup-text">Proceed to <strong>${pickupLocation}</strong> with your university student ID card.</p>
@@ -140,7 +136,6 @@ function renderClaimsGrid() {
                             <div style="margin-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 10px;">
                                 ${!claim.claimant_confirmed ? `
                                     <button class="dashboard-action-btn accept" style="background: #2b4530; color: white; border: none; padding: 10px 16px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer;" onclick="window.handleClaimantReceipt('${claim.id}')"><i class="fa-solid fa-box-open" style="margin-right: 5px;"></i> I Have Received My Item</button>
-                                    <p style="font-size: 0.75rem; color: #555; margin-top: 4px; text-align: center;"><i class="fa-solid fa-triangle-exclamation"></i> Note: Complete this step within 24 hours or the reservation expires.</p>
                                 ` : `
                                     <span style="font-style: italic; font-size: 0.85rem; display: block; text-align: center; color: #555;"><i class="fa-solid fa-hourglass-half"></i> Verification saved! Waiting for the finder to confirm handout...</span>
                                 `}
@@ -155,37 +150,59 @@ function renderClaimsGrid() {
 
 // --- 4. Event Controls & Listeners Binding ---
 function setupClaimsListeners() {
-    // FIXED: Added event listener to run the grid renderer whenever user types
     const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', renderClaimsGrid);
-    }
+    if (searchInput) searchInput.addEventListener('input', renderClaimsGrid);
 
-    // Category Filter Buttons
-    document.querySelectorAll('.filter-btn').forEach(btn => {
+    document.querySelectorAll('.filter-btn:not(#toggleArchiveBtn)').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.filter-btn:not(#toggleArchiveBtn)').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
             currentFilter = btn.getAttribute('data-filter');
             renderClaimsGrid();
         });
     });
+
+    // NEW: Archive Toggle Button Logic
+    const archiveBtn = document.getElementById('toggleArchiveBtn');
+    if (archiveBtn) {
+        archiveBtn.addEventListener('click', () => {
+            isArchiveView = !isArchiveView; // Flip state
+            
+            // Update button UI
+            if (isArchiveView) {
+                archiveBtn.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Back to Active`;
+                archiveBtn.style.backgroundColor = '#1e293b';
+                archiveBtn.style.color = '#ffffff';
+            } else {
+                archiveBtn.innerHTML = `<i class="fa-solid fa-box-archive"></i> View Archives`;
+                archiveBtn.style.backgroundColor = '#f1f5f9';
+                archiveBtn.style.color = '#475569';
+            }
+            
+            // Re-fetch the data based on the new state
+            fetchMySubmittedClaims(currentUser.id);
+        });
+    }
 }
 
 // --- Database Operations ---
 window.handleClaimantReceipt = async (claimId) => {
     if (!confirm("Confirming means you have physically received your lost item. Proceed?")) return;
+    const { error } = await _supabase.from('claims').update({ claimant_confirmed: true }).eq('id', claimId);
+    if (error) return alert("Transaction Error: " + error.message);
+    fetchMySubmittedClaims(currentUser.id);
+};
 
-    const { error } = await _supabase
-        .from('claims')
-        .update({ claimant_confirmed: true })
-        .eq('id', claimId);
+window.archiveClaim = async (claimId) => {
+    if (!confirm("Hide this completed record from your dashboard?")) return;
+    const { error } = await _supabase.from('claims').update({ is_archived_by_claimer: true }).eq('id', claimId);
+    if (error) return alert("Archive Error: " + error.message);
+    fetchMySubmittedClaims(currentUser.id); 
+};
 
-    if (error) {
-        alert("Transaction Error: " + error.message);
-    } else {
-        alert("Reception confirmed! Thank you for using the portal.");
-        location.reload();
-    }
+// NEW: Restore function
+window.unarchiveClaim = async (claimId) => {
+    const { error } = await _supabase.from('claims').update({ is_archived_by_claimer: false }).eq('id', claimId);
+    if (error) return alert("Restore Error: " + error.message);
+    fetchMySubmittedClaims(currentUser.id); 
 };

@@ -1,24 +1,30 @@
 // --- Global State ---
 let allItems = [];
 let currentCategory = 'all';
+let currentUser = null; // NEW: Store the logged-in user globally
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', async () => {
+    // NEW: Fetch and store the current user before loading the gallery
+    const { data: { user } } = await _supabase.auth.getUser();
+    currentUser = user;
+
     await fetchGalleryItems();
     setupEventListeners();
-    checkHomepageRedirect(); // Captures incoming category navigation selections from home screen
+    checkHomepageRedirect(); 
 });
 
-// --- 1. Fetching Data (With Profile Links) ---
+// --- 1. Fetching Data (With Profile Links & Claims) ---
 async function fetchGalleryItems() {
     toggleLoading(true);
     
-    // Fetching items and 'joining' with profiles to get the finder's name
+    // NEW: Added "claims (claimer_id)" to the query so we know who claimed what
     const { data, error } = await _supabase
         .from('items')
         .select(`
             *,
-            profiles:reporter_id (full_name, contact_info)
+            profiles:reporter_id (full_name, contact_info),
+            claims (claimer_id)
         `)
         .order('created_at', { ascending: false });
 
@@ -46,13 +52,12 @@ function renderGallery() {
         
         // B. Automatic Hiding Window Rule for Handed-Over Items
         if (item.status === 'claimed') {
-            if (!item.claimed_at) return false; // Hide completely if legacy row is missing a timestamp
+            if (!item.claimed_at) return false; 
             
             const completionTime = new Date(item.claimed_at).getTime();
             const currentTime = new Date().getTime();
             const minutesElapsed = (currentTime - completionTime) / (1000 * 60);
             
-            // If more than 1 minute has passed since dual completion, hide it from the public gallery feed!
             if (minutesElapsed > 1) return false;
         }
 
@@ -69,11 +74,11 @@ function renderGallery() {
     grid.innerHTML = filtered.map(item => createItemCard(item)).join('');
 }
 
-// --- 3. Creating the Card Component ---
+// --- 3. Creating the Card Component (WITH SMART BUTTONS) ---
 function createItemCard(item) {
     const isAvailable = item.status === 'found';
     
-    // Maps database statuses cleanly to match your requested user interface wording
+    // Maps database statuses cleanly
     let statusText = item.status.toUpperCase();
     if (item.status === 'found') statusText = 'AVAILABLE';
     if (item.status === 'pending') statusText = 'PENDING';
@@ -86,35 +91,56 @@ function createItemCard(item) {
         ? new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
         : 'Unknown Date';
 
-// ... inside createItemCard(item) in gallery.js
-        return `
-            <div class="item-card">
-                <div class="item-image ${!item.image_url ? 'placeholder' : ''}">
-                    ${item.image_url ? `<img src="${item.image_url}" alt="${item.title}">` : '<span>No Image Provided</span>'}
-                </div>
-                <div class="item-details">
-                    <div class="item-header">
-                        <h4 class="item-name">${item.title}</h4>
-                        <span class="item-category">${item.category}</span>
-                    </div>
-                    <p class="item-location"><i class="fa-solid fa-location-dot" style="color: var(--cvsu-green); margin-right: 6px;"></i> Found: <strong>${item.location_found} • ${foundDate}</strong></p>
-                    <p class="item-finder"><i class="fa-solid fa-user" style="color: var(--text-secondary); margin-right: 6px;"></i> By: <strong>${item.profiles?.full_name || 'Anonymous User'}</strong></p>
-                    
-                    <p class="item-desc-snippet" style="font-size: 0.85rem; color: #64748b; margin: 6px 0 12px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.4;">
-                        ${item.description || 'No additional details provided.'}
-                    </p>
+    // --- NEW: SMART BUTTON LOGIC ---
+    // Check if current user is the finder
+    const isMyReport = currentUser && (currentUser.id === item.reporter_id);
+    
+    // Check if current user has already submitted a claim for this item
+    const hasAlreadyClaimed = currentUser && item.claims?.some(claim => claim.claimer_id === currentUser.id);
 
-                    <div class="item-footer">
-                        <span class="item-status ${statusClass}">${statusText}</span>
-                        <button class="claim-btn" 
-                                ${!isAvailable ? 'disabled' : ''} 
-                                onclick="openClaimModal('${item.id}', '${item.title.replace(/'/g, "\\'")}')">
-                            ${isAvailable ? 'Claim' : 'Unavailable'}
-                        </button>
-                    </div>
+    let buttonHTML = '';
+    
+    if (isMyReport) {
+        // Lock 1: It's their own post
+        buttonHTML = `<button class="claim-btn" disabled style="background-color: #718096; cursor: not-allowed;">Your Post</button>`;
+    } else if (hasAlreadyClaimed) {
+        // Lock 2: They already claimed it
+        buttonHTML = `<button class="claim-btn" disabled style="background-color: #1565c0; cursor: not-allowed;">Claim Submitted</button>`;
+    } else {
+        // Default: Available to claim
+        buttonHTML = `
+            <button class="claim-btn" 
+                    ${!isAvailable ? 'disabled' : ''} 
+                    onclick="openClaimModal('${item.id}', '${item.title.replace(/'/g, "\\'")}')">
+                ${isAvailable ? 'Claim' : 'Unavailable'}
+            </button>
+        `;
+    }
+
+    return `
+        <div class="item-card">
+            <div class="item-image ${!item.image_url ? 'placeholder' : ''}">
+                ${item.image_url ? `<img src="${item.image_url}" alt="${item.title}">` : '<span>No Image Provided</span>'}
+            </div>
+            <div class="item-details">
+                <div class="item-header">
+                    <h4 class="item-name">${item.title}</h4>
+                    <span class="item-category">${item.category}</span>
+                </div>
+                <p class="item-location"><i class="fa-solid fa-location-dot" style="color: var(--cvsu-green); margin-right: 6px;"></i> Found: <strong>${item.location_found} • ${foundDate}</strong></p>
+                <p class="item-finder"><i class="fa-solid fa-user" style="color: var(--text-secondary); margin-right: 6px;"></i> By: <strong>${item.profiles?.full_name || 'Anonymous User'}</strong></p>
+                
+                <p class="item-desc-snippet" style="font-size: 0.85rem; color: #64748b; margin: 6px 0 12px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.4;">
+                    ${item.description || 'No additional details provided.'}
+                </p>
+
+                <div class="item-footer">
+                    <span class="item-status ${statusClass}">${statusText}</span>
+                    ${buttonHTML}
                 </div>
             </div>
-        `;
+        </div>
+    `;
 }
 
 // --- 4. Handle Incoming Category Redirects ---
@@ -145,7 +171,6 @@ window.openClaimModal = async (id, name) => {
     document.getElementById('claimItemId').value = id;
     document.getElementById('modalItemName').innerText = `Item: ${name}`;
 
-    // LOCATE THE DESCRIPTION FROM THE CURRENT LIVE STATE ARRAY
     const selectedItem = allItems.find(item => item.id === id);
     const modalDescElement = document.getElementById('modalItemDescription');
     
