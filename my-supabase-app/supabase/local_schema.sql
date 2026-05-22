@@ -59,24 +59,55 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
 
 
+CREATE OR REPLACE FUNCTION "public"."enforce_claim_expiration_windows"() RETURNS "void"
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN
+    -- 1. Revert parent items back to available status
+    UPDATE public.items
+    SET status = 'found',
+        pickup_location = NULL
+    WHERE id IN (
+        SELECT item_id 
+        FROM public.claims 
+        WHERE claim_status = 'approved' 
+          AND (finder_confirmed = FALSE OR claimant_confirmed = FALSE)
+          AND approved_at < NOW() - INTERVAL '5 minute'
+    );
+
+    -- 2. Reset the stalled claim records back to pending review
+    UPDATE public.claims
+    SET claim_status = 'pending',
+        finder_confirmed = FALSE,
+        claimant_confirmed = FALSE,
+        approved_at = NULL
+    WHERE claim_status = 'approved'
+      AND (finder_confirmed = FALSE OR claimant_confirmed = FALSE)
+      AND approved_at < NOW() - INTERVAL '1 minute';
+end;
+$$;
+
+
+ALTER FUNCTION "public"."enforce_claim_expiration_windows"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
-    AS $$
-BEGIN
-  INSERT INTO public.profiles (id, student_id, full_name, security_question, security_answer)
+    AS $$BEGIN
+  INSERT INTO public.profiles (id, student_id, full_name, security_question, security_answer, contact_info)
   VALUES (
     new.id, 
     new.raw_user_meta_data->>'student_id',
     new.raw_user_meta_data->>'full_name',
     new.raw_user_meta_data->>'security_question',
-    new.raw_user_meta_data->>'security_answer'
+    new.raw_user_meta_data->>'security_answer',
+    new.raw_user_meta_data->>'contact_info'    
   );
   RETURN new;
 EXCEPTION WHEN OTHERS THEN
   RETURN new;
-END;
-$$;
+END;$$;
 
 
 ALTER FUNCTION "public"."handle_new_user"() OWNER TO "postgres";
@@ -97,6 +128,24 @@ $$;
 
 
 ALTER FUNCTION "public"."is_admin"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."process_dual_claim_completion"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+BEGIN
+    IF NEW.finder_confirmed = TRUE AND NEW.claimant_confirmed = TRUE THEN
+        UPDATE public.items 
+        SET status = 'claimed',
+            claimed_at = NOW()
+        WHERE id = NEW.item_id;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."process_dual_claim_completion"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."reset_password_via_security_question"("target_student_id" "text", "provided_answer" "text", "new_password_text" "text") RETURNS boolean
@@ -139,7 +188,11 @@ CREATE TABLE IF NOT EXISTS "public"."claims" (
     "claim_status" "text" DEFAULT 'pending'::"text",
     "created_at" timestamp with time zone DEFAULT "now"(),
     "claimant_contact" "text",
-    CONSTRAINT "claims_claim_status_check" CHECK (("claim_status" = ANY (ARRAY['pending'::"text", 'approved'::"text", 'denied'::"text"])))
+    "finder_confirmed" boolean DEFAULT false,
+    "claimant_confirmed" boolean DEFAULT false,
+    "approved_at" timestamp with time zone,
+    "is_archived_by_claimer" boolean DEFAULT false,
+    CONSTRAINT "claims_claim_status_check" CHECK (("claim_status" = ANY (ARRAY['pending'::"text", 'approved'::"text", 'rejected'::"text", 'accepted'::"text"])))
 );
 
 
@@ -148,6 +201,15 @@ ALTER TABLE "public"."claims" OWNER TO "postgres";
 
 COMMENT ON TABLE "public"."claims" IS '@graphql({"enabled": false})';
 
+
+
+CREATE TABLE IF NOT EXISTS "public"."enrolled_students" (
+    "student_id" "text" NOT NULL,
+    "full_name" "text" NOT NULL
+);
+
+
+ALTER TABLE "public"."enrolled_students" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."items" (
@@ -160,7 +222,10 @@ CREATE TABLE IF NOT EXISTS "public"."items" (
     "status" "text" DEFAULT 'found'::"text",
     "image_url" "text",
     "created_at" timestamp with time zone DEFAULT "now"(),
-    CONSTRAINT "items_status_check" CHECK (("status" = ANY (ARRAY['lost'::"text", 'found'::"text", 'returned'::"text"])))
+    "pickup_location" "text",
+    "claimed_at" timestamp with time zone,
+    "is_archived_by_finder" boolean DEFAULT false,
+    CONSTRAINT "items_status_check" CHECK (("status" = ANY (ARRAY['found'::"text", 'pending'::"text", 'claimed'::"text", 'returned'::"text"])))
 );
 
 
@@ -204,6 +269,11 @@ ALTER TABLE ONLY "public"."claims"
 
 
 
+ALTER TABLE ONLY "public"."enrolled_students"
+    ADD CONSTRAINT "enrolled_students_pkey" PRIMARY KEY ("student_id");
+
+
+
 ALTER TABLE ONLY "public"."items"
     ADD CONSTRAINT "items_pkey" PRIMARY KEY ("id");
 
@@ -221,6 +291,15 @@ ALTER TABLE ONLY "public"."profiles"
 
 ALTER TABLE ONLY "public"."profiles"
     ADD CONSTRAINT "unique_student_id" UNIQUE ("student_id");
+
+
+
+ALTER TABLE ONLY "public"."claims"
+    ADD CONSTRAINT "unique_user_item_claim" UNIQUE ("item_id", "claimer_id");
+
+
+
+CREATE OR REPLACE TRIGGER "trigger_sync_claim_completion" BEFORE UPDATE ON "public"."claims" FOR EACH ROW EXECUTE FUNCTION "public"."process_dual_claim_completion"();
 
 
 
@@ -252,7 +331,59 @@ CREATE POLICY "Admins can update claim status" ON "public"."claims" FOR UPDATE U
 
 
 
+CREATE POLICY "Allow claimants to update their own claims" ON "public"."claims" FOR UPDATE TO "authenticated" USING ((( SELECT "auth"."uid"() AS "uid") = "claimer_id"));
+
+
+
+CREATE POLICY "Allow finders to update claims on their items" ON "public"."claims" FOR UPDATE TO "authenticated" USING (("item_id" IN ( SELECT "items"."id"
+   FROM "public"."items"
+  WHERE ("items"."reporter_id" = ( SELECT "auth"."uid"() AS "uid")))));
+
+
+
+CREATE POLICY "Allow finders to update their own items" ON "public"."items" FOR UPDATE TO "authenticated" USING ((( SELECT "auth"."uid"() AS "uid") = "reporter_id"));
+
+
+
+CREATE POLICY "Allow finders to view claims on their items" ON "public"."claims" FOR SELECT TO "authenticated" USING (("item_id" IN ( SELECT "items"."id"
+   FROM "public"."items"
+  WHERE ("items"."reporter_id" = ( SELECT "auth"."uid"() AS "uid")))));
+
+
+
 CREATE POLICY "Allow public read access for profiles" ON "public"."profiles" FOR SELECT USING (true);
+
+
+
+CREATE POLICY "Allow public read access to enrollment verification" ON "public"."enrolled_students" FOR SELECT TO "authenticated", "anon" USING (true);
+
+
+
+CREATE POLICY "Optimized update access for claims" ON "public"."claims" FOR UPDATE TO "authenticated" USING (((( SELECT "auth"."uid"() AS "uid") = "claimer_id") OR ("item_id" IN ( SELECT "items"."id"
+   FROM "public"."items"
+  WHERE ("items"."reporter_id" = ( SELECT "auth"."uid"() AS "uid")))) OR (( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = ( SELECT "auth"."uid"() AS "uid"))) = 'admin'::"text")));
+
+
+
+CREATE POLICY "Optimized update access for items" ON "public"."items" FOR UPDATE TO "authenticated" USING (((( SELECT "auth"."uid"() AS "uid") = "reporter_id") OR (( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = ( SELECT "auth"."uid"() AS "uid"))) = 'admin'::"text")));
+
+
+
+CREATE POLICY "Optimized view access for claims" ON "public"."claims" FOR SELECT TO "authenticated" USING (((( SELECT "auth"."uid"() AS "uid") = "claimer_id") OR ("item_id" IN ( SELECT "items"."id"
+   FROM "public"."items"
+  WHERE ("items"."reporter_id" = ( SELECT "auth"."uid"() AS "uid")))) OR (( SELECT "profiles"."role"
+   FROM "public"."profiles"
+  WHERE ("profiles"."id" = ( SELECT "auth"."uid"() AS "uid"))) = 'admin'::"text")));
+
+
+
+CREATE POLICY "Prevent finders from claiming their own items" ON "public"."claims" FOR INSERT WITH CHECK (("auth"."uid"() <> ( SELECT "items"."reporter_id"
+   FROM "public"."items"
+  WHERE ("items"."id" = "claims"."item_id"))));
 
 
 
@@ -288,7 +419,7 @@ CREATE POLICY "Users can update own profile" ON "public"."profiles" FOR UPDATE U
 
 
 
-CREATE POLICY "Users can update their own reports" ON "public"."items" FOR UPDATE USING (("auth"."uid"() = "id"));
+CREATE POLICY "Users can update their own reports" ON "public"."items" FOR UPDATE TO "authenticated" USING ((( SELECT "auth"."uid"() AS "uid") = "reporter_id"));
 
 
 
@@ -297,6 +428,9 @@ CREATE POLICY "Users can view own profile" ON "public"."profiles" FOR SELECT USI
 
 
 ALTER TABLE "public"."claims" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."enrolled_students" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."items" ENABLE ROW LEVEL SECURITY;
@@ -484,6 +618,12 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."enforce_claim_expiration_windows"() TO "anon";
+GRANT ALL ON FUNCTION "public"."enforce_claim_expiration_windows"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."enforce_claim_expiration_windows"() TO "service_role";
+
+
+
 REVOKE ALL ON FUNCTION "public"."handle_new_user"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
 
@@ -491,6 +631,14 @@ GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
 
 REVOKE ALL ON FUNCTION "public"."is_admin"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."is_admin"() TO "service_role";
+GRANT ALL ON FUNCTION "public"."is_admin"() TO "anon";
+GRANT ALL ON FUNCTION "public"."is_admin"() TO "authenticated";
+
+
+
+GRANT ALL ON FUNCTION "public"."process_dual_claim_completion"() TO "anon";
+GRANT ALL ON FUNCTION "public"."process_dual_claim_completion"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."process_dual_claim_completion"() TO "service_role";
 
 
 
@@ -518,6 +666,12 @@ GRANT ALL ON FUNCTION "public"."reset_password_via_security_question"("target_st
 GRANT ALL ON TABLE "public"."claims" TO "anon";
 GRANT ALL ON TABLE "public"."claims" TO "authenticated";
 GRANT ALL ON TABLE "public"."claims" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."enrolled_students" TO "anon";
+GRANT ALL ON TABLE "public"."enrolled_students" TO "authenticated";
+GRANT ALL ON TABLE "public"."enrolled_students" TO "service_role";
 
 
 
