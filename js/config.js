@@ -7,8 +7,8 @@ const LOCAL_CONFIG = {
 };
 
 const PROD_CONFIG = {
-    URL: "https://dejpkzyrveibkyqqvtns.supabase.co",
-    KEY: "sb_publishable_Xd0exvtjAYxoWB6SV0sheg_EyFIzXyB"
+    URL: "https://oidnfvbutpysbxyjhnlk.supabase.co/rest/v1/",
+    KEY: "sb_publishable_axSqQLkhjy9Trp60wYbuWA_ADyTLNax"
 };
 
 // Auto-select based on the toggle
