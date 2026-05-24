@@ -7,7 +7,7 @@ const LOCAL_CONFIG = {
 };
 
 const PROD_CONFIG = {
-    URL: "https://oidnfvbutpysbxyjhnlk.supabase.co/rest/v1/",
+    URL: "https://oidnfvbutpysbxyjhnlk.supabase.co",
     KEY: "sb_publishable_axSqQLkhjy9Trp60wYbuWA_ADyTLNax"
 };
 
