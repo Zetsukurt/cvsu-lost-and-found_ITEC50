@@ -1,15 +1,15 @@
 // --- Global State ---
 let myItems = [];
 let currentCategory = 'all';
-let isArchiveView = false; // NEW: Tracks vault state
-let currentUser = null;    // NEW: Global user storage
+let isArchiveView = false; // tracks vault state
+let currentUser = null;    // global user storage
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user }, error: userError } = await _supabase.auth.getUser();
 
     if (userError || !user) {
-        window.location.href = '/html/login.html';
+        window.location.href = '/html/auth-gods.html';
         return;
     }
 
@@ -193,11 +193,77 @@ function renderMyItemsGrid() {
 }
 
 // --- 4. Modal Controls & DB Actions ---
-window.openReviewModal = (itemId) => { /* ... existing modal code ... */ };
-window.closeReviewModal = () => { /* ... existing modal code ... */ };
-window.handleAcceptClaim = async (claimId, itemId) => { /* ... existing code ... */ };
-window.handleRejectClaim = async (claimId) => { /* ... existing code ... */ };
-window.handleFinderHandover = async (claimId) => { /* ... existing code ... */ };
+// --- 4. Modal Controls & DB Actions ---
+
+window.openReviewModal = (itemId) => {
+    // Find the item in the global array
+    const item = myItems.find(i => i.id === itemId);
+    if (!item) return;
+
+    // Filter for only pending claims
+    const pendingClaims = item.claims ? item.claims.filter(c => c.claim_status === 'pending') : [];
+
+    document.getElementById('reviewModalItemTitle').innerText = `Claims for: ${item.title}`;
+    document.getElementById('reviewModalItemSubtitle').innerText = `${pendingClaims.length} students are claiming this item.`;
+
+    const claimsListHtml = pendingClaims.map(claim => `
+        <div class="claim-review-card" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 8px;">
+            <p><strong>Claimant:</strong> ${claim.profiles?.full_name || 'Unknown'}</p>
+            <p><strong>Contact:</strong> ${claim.claimant_contact}</p>
+            <p><strong>Proof:</strong> "${claim.proof_text}"</p>
+            <div style="margin-top: 10px; display: flex; gap: 10px;">
+                <button style="background: #1b5e20; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;" onclick="window.handleAcceptClaim('${claim.id}', '${itemId}')">Approve Request</button>
+                <button style="background: #d32f2f; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;" onclick="window.handleRejectClaim('${claim.id}')">Reject</button>
+            </div>
+        </div>
+    `).join('');
+
+    document.getElementById('reviewModalClaimsList').innerHTML = claimsListHtml;
+    document.getElementById('reviewModalOverlay').style.display = 'flex';
+};
+
+window.closeReviewModal = () => {
+    document.getElementById('reviewModalOverlay').style.display = 'none';
+};
+
+// Approves one claim and updates the item status to 'pending' (waiting for physical handoff)
+window.handleAcceptClaim = async (claimId, itemId) => {
+    if (!confirm("Approve this claim? Other pending claims will be automatically rejected.")) return;
+
+    // 1. Update the specific claim to approved
+    await _supabase.from('claims').update({ claim_status: 'approved' }).eq('id', claimId);
+    
+    // 2. Reject all other claims for this item
+    await _supabase.from('claims').update({ claim_status: 'rejected' }).eq('item_id', itemId).eq('claim_status', 'pending');
+
+    // 3. Update the item status to pending (waiting for handoff)
+    await _supabase.from('items').update({ status: 'pending' }).eq('id', itemId);
+
+    alert("Claim approved! Coordinate with the student for the physical hand-off.");
+    window.closeReviewModal();
+    fetchMyReportedItems(currentUser.id);
+};
+
+window.handleRejectClaim = async (claimId) => {
+    if (!confirm("Reject this claim request?")) return;
+    await _supabase.from('claims').update({ claim_status: 'rejected' }).eq('id', claimId);
+    window.closeReviewModal();
+    fetchMyReportedItems(currentUser.id);
+};
+
+// Logs the physical handoff from the Finder's side
+window.handleFinderHandover = async (claimId) => {
+    if (!confirm("Confirm that you have physically handed this item to the claimant?")) return;
+    
+    const { error } = await _supabase.from('claims').update({ finder_confirmed: true }).eq('id', claimId);
+    
+    if (error) {
+        alert("Error: " + error.message);
+    } else {
+        alert("Hand-off confirmed! Waiting for claimant to verify on their end.");
+        fetchMyReportedItems(currentUser.id);
+    }
+};
 
 window.archiveItem = async (itemId) => {
     if (!confirm("Hide this completed record from your dashboard?")) return;
@@ -224,7 +290,7 @@ function setupDashboardListeners() {
         });
     });
 
-    // NEW: Archive Toggle Button Logic
+    // Archive Toggle Button Logic
     const archiveBtn = document.getElementById('toggleArchiveBtn');
     if (archiveBtn) {
         archiveBtn.addEventListener('click', () => {

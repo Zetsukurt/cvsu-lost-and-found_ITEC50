@@ -14,7 +14,7 @@ uploadForm.addEventListener('submit', async (e) => {
     submitBtn.innerText = "Uploading...";
 
     try {
-        // --- Get the logged-in user's data first ---
+        // Get the logged-in user's data first
         const { data: { user }, error: userError } = await _supabase.auth.getUser();
         
         if (userError || !user) {
@@ -51,7 +51,7 @@ uploadForm.addEventListener('submit', async (e) => {
                 location_found: location,
                 image_url: urlData.publicUrl,
                 status: 'found',
-                reporter_id: user.id // <--- THIS FIXES THE RLS ERROR
+                reporter_id: user.id 
             }]);
 
         if (insertError) throw insertError;
