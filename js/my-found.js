@@ -193,27 +193,38 @@ function renderMyItemsGrid() {
 }
 
 // --- 4. Modal Controls & DB Actions ---
+
 // --- 4. Modal Controls & DB Actions ---
 
 window.openReviewModal = (itemId) => {
-    // Find the item in the global array
     const item = myItems.find(i => i.id === itemId);
     if (!item) return;
 
-    // Filter for only pending claims
     const pendingClaims = item.claims ? item.claims.filter(c => c.claim_status === 'pending') : [];
 
     document.getElementById('reviewModalItemTitle').innerText = `Claims for: ${item.title}`;
     document.getElementById('reviewModalItemSubtitle').innerText = `${pendingClaims.length} students are claiming this item.`;
 
     const claimsListHtml = pendingClaims.map(claim => `
-        <div class="claim-review-card" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 8px;">
+        <div class="claim-review-card" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 8px; background: #fff;">
             <p><strong>Claimant:</strong> ${claim.profiles?.full_name || 'Unknown'}</p>
             <p><strong>Contact:</strong> ${claim.claimant_contact}</p>
-            <p><strong>Proof:</strong> "${claim.proof_text}"</p>
-            <div style="margin-top: 10px; display: flex; gap: 10px;">
-                <button style="background: #1b5e20; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;" onclick="window.handleAcceptClaim('${claim.id}', '${itemId}')">Approve Request</button>
-                <button style="background: #d32f2f; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;" onclick="window.handleRejectClaim('${claim.id}')">Reject</button>
+            <p style="margin-bottom: 15px;"><strong>Proof:</strong> "${claim.proof_text}"</p>
+            
+            <div style="margin-bottom: 15px; background: #f9f9f9; padding: 10px; border-radius: 5px; border-left: 3px solid #3d5a3d;">
+                <label for="pickupLocation_${claim.id}" style="font-size: 0.85rem; font-weight: bold; color: #3d5a3d; display: block; margin-bottom: 5px;">Assign Drop-off / Meetup Location:</label>
+                <select id="pickupLocation_${claim.id}" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; outline: none;">
+                    <option value="" disabled selected>-- Select Campus Location --</option>
+                    <option value="CvSU Main Gate / Security">CvSU Main Gate / Security</option>
+                    <option value="CSG Office">CSG Office</option>
+                    <option value="CSSO Office">CSSO Office</option>
+                    <option value="Main Library">Main Library</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button style="background: #1b5e20; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold;" onclick="window.handleAcceptClaim('${claim.id}', '${itemId}')"><i class="fa-solid fa-check"></i> Approve Request</button>
+                <button style="background: #d32f2f; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold;" onclick="window.handleRejectClaim('${claim.id}')"><i class="fa-solid fa-xmark"></i> Reject</button>
             </div>
         </div>
     `).join('');
@@ -226,23 +237,40 @@ window.closeReviewModal = () => {
     document.getElementById('reviewModalOverlay').style.display = 'none';
 };
 
-// Approves one claim and updates the item status to 'pending' (waiting for physical handoff)
-window.handleAcceptClaim = async (claimId, itemId) => {
-    if (!confirm("Approve this claim? Other pending claims will be automatically rejected.")) return;
 
-    // 1. Update the specific claim to approved
+// Updated logic to grab the location and save it to the database
+window.handleAcceptClaim = async (claimId, itemId) => {
+    // Grab the dropdown element specifically for this claim
+    const locationSelect = document.getElementById(`pickupLocation_${claimId}`);
+    const pickupLocation = locationSelect ? locationSelect.value : '';
+
+    // Block the submission if they forgot to pick a location
+    if (!pickupLocation) {
+        alert("Wait! You must select a drop-off/meetup location before approving this claim.");
+        return;
+    }
+
+    if (!confirm(`Approve this claim and assign the meetup location to: ${pickupLocation}?`)) return;
+
+    // 1. Approve the specific claim
     await _supabase.from('claims').update({ claim_status: 'approved' }).eq('id', claimId);
     
-    // 2. Reject all other claims for this item
+    // 2. Reject all other pending claims for this item
     await _supabase.from('claims').update({ claim_status: 'rejected' }).eq('item_id', itemId).eq('claim_status', 'pending');
 
-    // 3. Update the item status to pending (waiting for handoff)
-    await _supabase.from('items').update({ status: 'pending' }).eq('id', itemId);
+    // 3. Update the item status AND inject the pickup location
+    await _supabase.from('items').update({ 
+        status: 'pending',
+        pickup_location: pickupLocation 
+    }).eq('id', itemId);
 
-    alert("Claim approved! Coordinate with the student for the physical hand-off.");
+    alert("Claim approved and location assigned! The claimant will now see where to meet you.");
     window.closeReviewModal();
     fetchMyReportedItems(currentUser.id);
 };
+
+
+// Approves one claim and updates the item status to 'pending' (waiting for physical handoff
 
 window.handleRejectClaim = async (claimId) => {
     if (!confirm("Reject this claim request?")) return;
