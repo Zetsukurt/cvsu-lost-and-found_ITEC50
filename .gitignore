@@ -1,5 +1,10 @@
-#API Keys
-js/config.js
+# Node Dependencies (DO NOT UPLOAD THIS)
+node_modules/
 
+# Local Supabase Database Configs & Temp Files
 my-supabase-app/supabase/.temp/
 my-supabase-app/supabase/.branches/
+.supabase/
+
+# Mac system files
+.DS_Store
