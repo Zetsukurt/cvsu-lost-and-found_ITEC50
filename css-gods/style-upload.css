@@ -127,6 +127,7 @@ body.upload-wrapper {
     padding: 30px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.4);
     max-height: 90%; /* Keep it within view */
+    overflow-y: auto; /* <-- ADD THIS LINE to fix the button! */
 }
 
 .form-panel h2 { font-family: 'Georgia', serif; font-style: italic; color: var(--cvsu-green); margin-bottom: 20px; font-size: 1.4rem; }
